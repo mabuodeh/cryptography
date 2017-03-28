@@ -1,4 +1,4 @@
 # cryptography
 Learning cryptography and using c++
 
-- must refactor hex_to_base64
+Added more functionality; strings to hex or base64, xor on bits, etc..
