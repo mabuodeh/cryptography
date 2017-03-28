@@ -18,7 +18,7 @@ void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals) {
     std::copy(temp.rbegin(), temp.rend(), std::back_inserter(bool_vals));
 }
 
-std::vector<int> SetOne::bits_to_n(std::vector<bool> bit_vals, int n) {
+std::vector<int> SetOne::bin_to_num(std::vector<bool> bit_vals, int n) {
    std::vector<int> ret;
    int sum = 0, count = 0;
    int diff = n - 1;
@@ -74,7 +74,7 @@ std::vector<bool> SetOne::base64_string_to_bits(const std::string& base_string) 
 */
 
 std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
-   std::vector<int> sixes(bits_to_n(bit_vals, BASE64_DIGIT_SZ));
+   std::vector<int> sixes(bin_to_num(bit_vals, BASE64_DIGIT_SZ));
    //std::vector<char> ret;
    std::string ret;
 
@@ -146,7 +146,7 @@ std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<b
 std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
    std::string ret;
 
-   std::vector<int> hex_quarts = bits_to_n(bits, HEX_DIGIT_SZ);
+   std::vector<int> hex_quarts = bin_to_num(bits, HEX_DIGIT_SZ);
    std::vector<char> hex_vals(get_hex_values());
 
    for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
