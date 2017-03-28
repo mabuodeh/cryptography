@@ -4,7 +4,7 @@
 #include <math.h>
 
 
-void SetOne::binary(int num, std::vector<bool>& bool_vals) {
+void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals) {
 
     std::vector<bool> temp;
 
@@ -17,6 +17,27 @@ void SetOne::binary(int num, std::vector<bool>& bool_vals) {
     }
     std::copy(temp.rbegin(), temp.rend(), std::back_inserter(bool_vals));
 }
+
+std::vector<int> SetOne::bits_to_n(std::vector<bool> bit_vals, int n) {
+   std::vector<int> ret;
+   int sum = 0, count = 0;
+   int diff = n - 1;
+
+   for (std::vector<bool>::iterator i = bit_vals.begin(); i != bit_vals.end(); ++i) {
+      //std::cout << *i << " ";
+      sum += (*i) * pow(2, diff - count);
+      ++count;
+      if (count == n) {
+         //std::cout << " " << sum << " " << std::endl;
+         ret.push_back(sum);
+         count = 0;
+         sum = 0;
+      }
+   }
+
+   return ret;
+}
+
 
 std::vector<char> SetOne::get_hex_values() {
    std::vector<char> hex_vals;
@@ -41,7 +62,7 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 
       std::vector<char>::size_type hex_weight = std::distance(hex_vals.begin(), c);
 
-      binary(hex_weight, bit_vals);
+      num_to_bin(hex_weight, bit_vals);
    }
    return bit_vals;
 }
@@ -51,32 +72,6 @@ std::vector<bool> SetOne::base64_string_to_bits(const std::string& base_string) 
 
 }
 */
-std::vector<int> SetOne::bits_to_n(std::vector<bool> bit_vals, int n) {
-   std::vector<int> ret;
-   int sum = 0, count = 0;
-/*
-   for (std::vector<bool>::iterator i = bit_vals.begin(); i != bit_vals.end(); ++i) {
-         std::cout << *i << " ";
-   }
-   std::cout << std::endl << "checking bit_vals before sixes " << bit_vals.size() << std::endl;
-*/
-
-   for (std::vector<bool>::iterator i = bit_vals.begin(); i != bit_vals.end(); ++i) {
-      int diff = n - 1;
-      //std::cout << *i << " ";
-      sum += (*i) * pow(2, diff - count);
-      ++count;
-      if (count == n) {
-         //std::cout << " " << sum << " " << std::endl;
-         ret.push_back(sum);
-         count = 0;
-         sum = 0;
-      }
-   }
-   //std::cout << std::endl << std::endl;
-
-   return ret;
-}
 
 std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
    std::vector<int> sixes(bits_to_n(bit_vals, BASE64_DIGIT_SZ));

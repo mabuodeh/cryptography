@@ -8,7 +8,7 @@
 class SetOne {
 
 private:
-   void static binary(int, std::vector<bool>&);
+   void static num_to_bin(int, std::vector<bool>&);
    std::vector<int> static bits_to_n(std::vector<bool>, int);
    //std::vector<char> hex_vals;
 
