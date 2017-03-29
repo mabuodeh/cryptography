@@ -4,17 +4,24 @@
 #include <math.h>
 
 
-void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals) {
+void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals, int desired_sz) {
 
     std::vector<bool> temp;
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < desired_sz; ++i) {
+    //while (num != 0) {
       if (num % 2 == 0)
          temp.push_back(0);
       else
          temp.push_back(1);
       num /= 2;
     }
+   /*
+   for (std::vector<bool>::iterator it = temp.begin(); it != temp.end(); ++it) {
+      std::cout << *it;
+   }
+   std::cout << std::endl;
+   */
     std::copy(temp.rbegin(), temp.rend(), std::back_inserter(bool_vals));
 }
 
@@ -62,9 +69,27 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 
       std::vector<char>::size_type hex_weight = std::distance(hex_vals.begin(), c);
 
-      num_to_bin(hex_weight, bit_vals);
+      num_to_bin(hex_weight, bit_vals, HEX_QUART_DIGIT_SZ);
    }
    return bit_vals;
+}
+
+std::vector<bool> SetOne::bit_string_to_bit_vec(std::string char_string) {
+   std::vector<bool> ret;
+
+   //for (std::string::iterator it = char_string.begin(); it != char_string.end(); ++it) {
+   for (std::string::size_type i = 0; i < char_string.size(); ++i) {
+      bool temp = char_string[i] == '0'? 0 : 1;
+      ret.push_back(temp);
+   }
+   /*
+   for (std::vector<bool>::iterator it = ret.begin(); it != ret.end(); ++it) {
+      std::cout << *it;
+   }
+   std::cout << std::endl;
+   */
+
+   return ret;
 }
 
 /*
@@ -72,6 +97,20 @@ std::vector<bool> SetOne::base64_string_to_bits(const std::string& base_string) 
 
 }
 */
+
+
+std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
+   std::string ret;
+
+   std::vector<int> hex_quarts = bin_to_num(bits, HEX_QUART_DIGIT_SZ);
+   std::vector<char> hex_vals(get_hex_values());
+
+   for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
+      ret.append(1, hex_vals[*it]);
+   }
+
+   return ret;
+}
 
 std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
    std::vector<int> sixes(bin_to_num(bit_vals, BASE64_DIGIT_SZ));
@@ -104,10 +143,24 @@ std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
 
 }
 
+std::string SetOne::bits_to_ascii_string(std::vector<bool>& bit_vals) {
+   std::string ret;
+
+   std::vector<int> eighths(bin_to_num(bit_vals, HEX_OCTET_DIGIT_SZ));
+
+   for (std::vector<int>::iterator it = eighths.begin(); it != eighths.end(); ++it) {
+      char temp = *it;
+      //std::cout << *it << " " << temp << std::endl;
+      ret.append(1, temp);
+   }
+
+   return ret;
+}
+
 void SetOne::check_equality(std::string s1, std::string s2) {
    std::cout << s1 << std::endl;
    std::cout << s2 << std::endl;
-   std::cout << "equal? ";
+   std::cout << "equal? " << std::endl;
    (s1 == s2) ? std::cout <<"YES" : std::cout <<"NO";
    std::cout << std::endl;
 
@@ -121,7 +174,7 @@ void SetOne::check_equality(std::vector<bool> first_vec, std::vector<bool> secon
    for (std::vector<bool>::iterator it = second_vec.begin(); it != second_vec.end(); ++it) {
       std::cout << *it;
    }
-   std::cout << "equal? " << std::endl;
+   std::cout << std::endl << "equal? " << std::endl;
    (first_vec == second_vec) ? std::cout <<"YES" : std::cout <<"NO";
    std::cout << std::endl;
 
@@ -143,15 +196,36 @@ std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<b
    return ret;
 }
 
-std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
+std::string SetOne::num_to_bit_string(int num) {
    std::string ret;
+   std::vector<bool> char_bits;
 
-   std::vector<int> hex_quarts = bin_to_num(bits, HEX_DIGIT_SZ);
-   std::vector<char> hex_vals(get_hex_values());
+   num_to_bin(num, char_bits, HEX_OCTET_DIGIT_SZ);
 
-   for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
-      ret.append(1, hex_vals[*it]);
+   while (char_bits.size() != 8) {
+      char_bits.insert(char_bits.begin(), 0);
    }
+   for (std::vector<bool>::iterator it = char_bits.begin(); it != char_bits.end(); ++it) {
+      char temp = *it + '0';
+      ret.append(1, temp);
+   }
+   return ret;
 
+}
+
+std::string SetOne::bit_string_pattern(int sz, std::string char_bits) {
+   std::string ret;
+   for (int i = 0; i < sz; ++i) {
+      ret.append(char_bits);
+   }
+   return ret;
+}
+
+std::vector<bool> SetOne::bit_pattern(std::vector<bool>::size_type sz, std::vector<bool> hex_char) {
+   std::vector<bool> ret;
+
+   for (std::vector<bool>::size_type i = 0; i < sz; ++i) {
+      ret.insert(ret.end(), hex_char.begin(), hex_char.end());
+   }
    return ret;
 }
