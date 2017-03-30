@@ -30,7 +30,11 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-g" />
 		</Compiler>
+		<Unit filename="SetOne.cpp" />
+		<Unit filename="SetOne.h" />
+		<Unit filename="driver.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
