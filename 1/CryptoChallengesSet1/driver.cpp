@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 
+const std::string DIR = "text_files/";
+
 int main () {
 
    // Test for challenge 1
@@ -64,10 +66,10 @@ int main () {
       << final_key << std::endl << final_sentence << std::endl
       << "frequency value: " << final_freq << std::endl;
    */
-
-   // Test for challenge 4
    /*
-   std::ifstream fin("4.txt");
+   // Test for challenge 4
+   std::string file = DIR + "4.txt";
+   std::ifstream fin(file.c_str());
    std::string temp;
 
    std::vector<char> hex_vals = SetOne::get_hex_values();

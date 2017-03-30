@@ -4,7 +4,7 @@
 #include <math.h>
 #include <fstream>
 
-
+const std::string DIR = "text_files/";
 
 void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals, int desired_sz) {
 
@@ -60,7 +60,8 @@ std::vector<char> SetOne::get_hex_values() {
 
 std::map<std::string, double> SetOne::gen_word_freq_table() {
    std::map<std::string, double> ret;
-   std::ifstream fin("word_freq_list.txt");
+   std::string file = DIR + "word_freq_list.txt";
+   std::ifstream fin(fil.c_str());
 
    std::string a;
    double b;
