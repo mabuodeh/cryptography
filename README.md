@@ -5,6 +5,6 @@ Added more functionality; strings to hex or base64, xor on bits, etc..
 
 Tasks:
 
-Create a letter frequency method, to determine highest score after deciphering
+Work on directory
 
 Refactor check_equality function to be generic
