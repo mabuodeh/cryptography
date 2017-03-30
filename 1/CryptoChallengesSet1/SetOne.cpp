@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 #include <math.h>
+#include <fstream>
+
 
 
 void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals, int desired_sz) {
@@ -56,8 +58,20 @@ std::vector<char> SetOne::get_hex_values() {
    return hex_vals;
 }
 
+std::map<std::string, double> SetOne::gen_word_freq_table() {
+   std::map<std::string, double> ret;
+   std::ifstream fin("word_freq_list.txt");
+
+   std::string a;
+   double b;
+   while(fin >> a >> b) {
+      ret[a] = b;
+   }
+   return ret;
+}
+
 std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
-   std::vector<char> hex_vals(get_hex_values());
+   static std::vector<char> hex_vals(get_hex_values());
 
    std::vector<char> str_char(str.begin(), str.end());
 
@@ -103,7 +117,7 @@ std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
    std::string ret;
 
    std::vector<int> hex_quarts = bin_to_num(bits, HEX_QUART_DIGIT_SZ);
-   std::vector<char> hex_vals(get_hex_values());
+   static std::vector<char> hex_vals(get_hex_values());
 
    for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
       ret.append(1, hex_vals[*it]);
@@ -227,5 +241,30 @@ std::vector<bool> SetOne::bit_pattern(std::vector<bool>::size_type sz, std::vect
    for (std::vector<bool>::size_type i = 0; i < sz; ++i) {
       ret.insert(ret.end(), hex_char.begin(), hex_char.end());
    }
+   return ret;
+}
+
+double SetOne::calc_word_frequency(std::string str) {
+   double ret = 0.0;
+
+   static std::map<std::string, double> words = gen_word_freq_table();
+
+   std::string::iterator i = str.begin(), j;
+   std::map<std::string, double>::iterator it;
+   //std::cout << str << std::endl;
+   while (i != str.end()) {
+      j = i;
+      while (j != str.end() && (*j) != ' ')
+         ++j;
+      if (j != i) {
+         it = words.find(std::string(i,j));
+         if ((it != words.end()))
+            ret += it->second;
+      }
+      while (j != str.end() && (*j) == ' ')
+         ++j;
+      i = j;
+   }
+
    return ret;
 }

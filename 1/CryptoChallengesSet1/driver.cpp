@@ -9,9 +9,11 @@ int main () {
 
    std::vector<bool> bits = SetOne::hex_string_to_bits(given);
    std::vector<char> hex_vals = SetOne::get_hex_values();
-
-   //for (int i = 0; i < 127; ++i) {
-      int i = 0x58;
+   std::string final_sentence;
+   double final_freq = 0.0;
+   std::string final_key;
+   for (int i = 0; i < 127; ++i) {
+   //   int i = 0x58;
       std::string char_bits_string = SetOne::num_to_bit_string(i);
       std::vector<bool> char_bits = SetOne::bit_string_to_bit_vec(char_bits_string);
       std::vector<bool> bit_pattern = SetOne::bit_pattern(bits.size()/8, char_bits);
@@ -20,9 +22,23 @@ int main () {
       std::cout << std::endl << "Key: ";
       for (std::vector<bool>::iterator it = char_bits.begin(); it != char_bits.end(); ++it)
          std::cout << *it;
-      std::cout << std::endl << "Value: " << (SetOne::bits_to_ascii_string(xor_bits)) << std::endl;
+      std::string gen_sentence = SetOne::bits_to_ascii_string(xor_bits);
+      std::cout << std::endl << "Value: " << gen_sentence << std::endl;
+
+      double temp_freq = SetOne::calc_word_frequency(gen_sentence);
+      std::cout << "temp_freq: " << temp_freq;
       std::cout << std::endl;
-   //}
+
+      if (temp_freq > final_freq) {
+         final_freq = temp_freq;
+         final_sentence = gen_sentence;
+         final_key = char_bits_string;
+      }
+   }
+   std::cout << std::endl << std::endl << "Final key and value: "
+      << final_key << std::endl << final_sentence << std::endl
+      << "frequency value: " << final_freq << std::endl;
+
    // test for challenge 1
    /*
    std::string given = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";

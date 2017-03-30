@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <map>
 
 class SetOne {
 
@@ -22,6 +23,8 @@ public:
 
    // Returns an array of hex values from 0 to f in a char vector (in order)
    std::vector<char> static get_hex_values();
+   // Returns a map of character frequencies
+   std::map<std::string, double> static gen_word_freq_table();
    // Converts a hex string into bits, storing the bits in a boolean vector
    std::vector<bool> static hex_string_to_bits(std::string);
    // Converts a char string into bits, storing the bits in a boolean vector
@@ -46,6 +49,8 @@ public:
    std::string static num_to_bit_string(int);
    std::string static bit_string_pattern(int, std::string);
    std::vector<bool> static bit_pattern(std::vector<bool>::size_type, std::vector<bool>);
+
+   double static calc_word_frequency(std::string);
 
    // review bits_to_sixes
 
