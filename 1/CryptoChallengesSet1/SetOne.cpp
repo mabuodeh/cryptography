@@ -61,7 +61,7 @@ std::vector<char> SetOne::get_hex_values() {
 std::map<std::string, double> SetOne::gen_word_freq_table() {
    std::map<std::string, double> ret;
    std::string file = DIR + "word_freq_list.txt";
-   std::ifstream fin(fil.c_str());
+   std::ifstream fin(file.c_str());
 
    std::string a;
    double b;
@@ -172,6 +172,17 @@ std::string SetOne::bits_to_ascii_string(std::vector<bool>& bit_vals) {
    return ret;
 }
 
+std::vector<bool> SetOne::ascii_str_to_bit_vec(std::string str) {
+   std::vector<bool> ret;
+
+   for (std::string::size_type i = 0; i < str.size(); ++i) {
+      int temp = str[i];
+      num_to_bin(temp, ret, HEX_OCTET_DIGIT_SZ);
+   }
+
+   return ret;
+}
+
 void SetOne::check_equality(std::string s1, std::string s2) {
    std::cout << s1 << std::endl;
    std::cout << s2 << std::endl;
@@ -195,6 +206,7 @@ void SetOne::check_equality(std::vector<bool> first_vec, std::vector<bool> secon
 
 }
 
+/*
 std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
    std::vector<bool> ret;
 
@@ -207,6 +219,26 @@ std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<b
       //ret.append(std::string(1, temp));
       ++it1;
       ++it2;
+   }
+   return ret;
+}
+*/
+
+// xor main vec against key
+std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
+   std::vector<bool> ret;
+
+   std::vector<bool>::iterator it1 = first_vec.begin(), it1e = first_vec.end();
+   std::vector<bool>::iterator it2 = second_vec.begin(), it2e = second_vec.end();
+
+   while (it1 != it1e) {
+      while (it2 != it2e && it1 != it1e) {
+         //std::cout << (*it1) << " " << *it2 << std::endl;
+         ret.push_back((*it1) ^ (*it2));
+         ++it1;
+         ++it2;
+      }
+      it2 = second_vec.begin();
    }
    return ret;
 }

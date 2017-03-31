@@ -1,6 +1,7 @@
 #include "SetOne.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 const std::string DIR = "text_files/";
 
@@ -122,5 +123,35 @@ int main () {
       << final_freq << std::endl;
    */
 
+   // Test for challenge 5
+   /*
+   // open ifstream file
+   std::string input_file = DIR + "5_to_encrypt.txt";
+   std::ifstream fin(input_file.c_str());
+
+   std::string expected_output = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
+a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+   std::string key = "ICE";
+
+   std::string line, temp;
+   while (std::getline(fin, temp)) {
+      line += temp;
+      line.append(1, '\n'); // newline for notepad files
+   }
+   // An extra '\n' is created in the end, that must be removed!
+   line.erase(line.end() - 1);
+
+   // obtain bit version of string
+   std::vector<bool> ascii_line = SetOne::ascii_str_to_bit_vec(line);
+
+   // obtain bit version of key
+   std::vector<bool> static key_bits = SetOne::ascii_str_to_bit_vec(key);
+
+   // xor string against key (improved different xor method)
+   std::vector<bool> encrypted_line = SetOne::xor_against(ascii_line, key_bits);
+   std::string hex_out(SetOne::bits_to_hex_string(encrypted_line));
+
+   SetOne::check_equality(hex_out, expected_output);
+   */
    return 0;
 }

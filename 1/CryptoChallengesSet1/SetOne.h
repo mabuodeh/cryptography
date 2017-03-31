@@ -38,13 +38,15 @@ public:
    // Given a vector of bits, return a string of ascii chars
    std::string static bits_to_ascii_string(std::vector<bool>&);
 
+   // Given ASCII string, convert to bit vector
+   std::vector<bool> static ascii_str_to_bit_vec(std::string);
 
    // Check whether two strings/bit vector are equal or not
    void static check_equality(std::string, std::string);
    void static check_equality(std::vector<bool>, std::vector<bool>);
 
    // Given two boolean vectors of equal size, xor them and return the resultant boolean vector
-   std::vector<bool> static xor_against(std::vector<bool>, std::vector<bool>);
+   std::vector<bool> static xor_against(std::vector<bool> main_vec, std::vector<bool> key);
 
    std::string static num_to_bit_string(int);
    std::string static bit_string_pattern(int, std::string);
