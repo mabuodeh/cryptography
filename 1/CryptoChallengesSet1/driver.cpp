@@ -8,14 +8,15 @@ const std::string DIR = "text_files/";
 int main () {
 
    // Test for challenge 1
-   /*
+
    std::string given = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
    std::string output = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
 
-   std::vector<bool> hex_bits = SetOne::hex_string_to_bits(given);
-   std::string bits_to_base64 = SetOne::bits_to_base64_string(hex_bits);
-   SetOne::check_equality(bits_to_base64, output);
-   */
+   std::string base64_string = SetOne::hex_to_base64(given);
+
+   SetOne::check_equality(base64_string, output);
+
+
    // test for challenge 2
    /*
    std::string first_hex = "1c0111001f010100061a024b53535009181c";

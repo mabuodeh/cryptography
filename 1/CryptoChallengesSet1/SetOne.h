@@ -21,8 +21,10 @@ public:
    static const int HEX_QUART_DIGIT_SZ = 4;
    static const int HEX_OCTET_DIGIT_SZ = 8;
 
+   std::string static hex_to_base64(std::string hex_string);
+
    // Returns an array of hex values from 0 to f in a char vector (in order)
-   std::vector<char> static get_hex_values();
+   std::map<char, int> static get_hex_values();
    // Returns a map of character frequencies
    std::map<std::string, double> static gen_word_freq_table();
    // Converts a hex string into bits, storing the bits in a boolean vector
