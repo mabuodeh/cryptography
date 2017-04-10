@@ -21,10 +21,15 @@ public:
    static const int HEX_QUART_DIGIT_SZ = 4;
    static const int HEX_OCTET_DIGIT_SZ = 8;
 
+   // challenge 1
    std::string static hex_to_base64(std::string hex_string);
+   // challenge 2
+   std::string static xor_hex_strings(std::string first_hex, std::string second_hex);
 
    // Returns an array of hex values from 0 to f in a char vector (in order)
-   std::map<char, int> static get_hex_values();
+   // note: since we sometimes need the char value given an int, this needs some work
+   std::map<char, int> static hex_num_map();
+   std::map<int, char> static num_hex_map();
    // Returns a map of character frequencies
    std::map<std::string, double> static gen_word_freq_table();
    // Converts a hex string into bits, storing the bits in a boolean vector

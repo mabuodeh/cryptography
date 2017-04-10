@@ -22,13 +22,31 @@ std::string SetOne::hex_to_base64(std::string hex_string) {
    return ret;
 }
 
+/* This routine xor's two hex strings by first converting them to bit vectors.
+The xor value is then converted back to a hex string and returned
+*/
+std::string SetOne::xor_hex_strings(std::string first_hex, std::string second_hex) {
+   std::string ret;
+   std::vector<bool> first_bit, second_bit;
+
+   // convert first hex string to a bit vector
+   first_bit = hex_string_to_bits(first_hex);
+   // convert second hex string to a bit vector
+   second_bit = hex_string_to_bits(second_hex);
+   // xor bit vectors
+   std::vector<bool> xor_vec = xor_against(first_bit, second_bit);
+   // convert xor'ed bit vector into string
+   ret = bits_to_hex_string(xor_vec);
+   // return xor'ed string
+   return ret;
+}
 /* This routine converts a hex string to a vector of bits */
 std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 
    // create a bit container to store bit equivalent of our hex string
    std::vector<bool> bit_vals;
    // get the map of hex values to get numeric values of hex digits
-   static std::map<char,int> hex_vals(get_hex_values());
+   static std::map<char,int> hex_vals(hex_num_map());
 
    // for loop (iterate) through the characters of the string
    for (std::string::iterator i = str.begin(); i != str.end() ; ++i) {
@@ -44,7 +62,7 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 }
 
 /* create a map container, assigning each hex digit its respective numeric value */
-std::map<char, int> SetOne::get_hex_values() {
+std::map<char, int> SetOne::hex_num_map() {
    // create map container
    std::map<char, int> hex_vals;
    // assign each hex digit its numeric value
@@ -52,6 +70,21 @@ std::map<char, int> SetOne::get_hex_values() {
    hex_vals['4'] = 4; hex_vals['5'] = 5; hex_vals['6'] = 6; hex_vals['7'] = 7;
    hex_vals['8'] = 8; hex_vals['9'] = 9; hex_vals['a'] = 10; hex_vals['b'] = 11;
    hex_vals['c'] = 12; hex_vals['d'] = 13; hex_vals['e'] = 14; hex_vals['f'] = 15;
+
+   // return map container
+   return hex_vals;
+
+}
+
+/* create a map container, assigning each numeric value its respective hex digit */
+std::map<int, char> SetOne::num_hex_map() {
+   // create map container
+   std::map<int, char> hex_vals;
+   // assign each hex digit its numeric value
+   hex_vals[0] = '0'; hex_vals[1] = '1'; hex_vals[2] = '2'; hex_vals[3] = '3';
+   hex_vals[4] = '4'; hex_vals[5] = '5'; hex_vals[6] = '6'; hex_vals[7] = '7';
+   hex_vals[8] = '8'; hex_vals[9] = '9'; hex_vals[10] = 'a'; hex_vals[11] = 'b';
+   hex_vals[12] = 'c'; hex_vals[13] = 'd'; hex_vals[14] = 'e'; hex_vals[15] = 'f';
 
    // return map container
    return hex_vals;
@@ -142,6 +175,43 @@ std::vector<int> SetOne::bin_to_num(std::vector<bool> bit_vals, int n) {
 
    return ret;
 }
+
+/* This routine converts a bit vector to a hex string */
+std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
+   std::string ret;
+   std::vector<int> hex_quarts;
+
+   // split bits into groups of four, and convert and store them in a quarts (int) vector
+   hex_quarts = bin_to_num(bits, HEX_QUART_DIGIT_SZ);
+
+   // loop through quarts vector, converting each number to its equivalent hex value
+   static std::map<int, char> hex_vals(num_hex_map());
+   for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
+      ret.append(1, hex_vals[*it]);
+   }
+
+   // return hex string
+   return ret;
+}
+
+/* This routine takes two bit vectors and xors them. */
+std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
+   std::vector<bool> ret;
+
+   std::vector<bool>::iterator it1 = first_vec.begin(), it1e = first_vec.end();
+   std::vector<bool>::iterator it2 = second_vec.begin(), it2e = second_vec.end();
+
+   while (it1 != it1e && it2 != it2e) {
+      ret.push_back((*it1) ^ (*it2));
+      //char temp = std::abs(str[i] - xor_with[i]) + '0';
+      //ret.append(std::string(1, temp));
+      ++it1;
+      ++it2;
+   }
+   return ret;
+}
+
+
 /*
 std::map<std::string, double> SetOne::gen_word_freq_table() {
    std::map<std::string, double> ret;
@@ -169,19 +239,6 @@ std::vector<bool> SetOne::bit_string_to_bit_vec(std::string char_string) {
    //}
    //std::cout << std::endl;
 
-
-   return ret;
-}
-
-std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
-   std::string ret;
-
-   std::vector<int> hex_quarts = bin_to_num(bits, HEX_QUART_DIGIT_SZ);
-   static std::vector<char> hex_vals(get_hex_values());
-
-   for (std::vector<int>::iterator it = hex_quarts.begin(); it != hex_quarts.end(); ++it) {
-      ret.append(1, hex_vals[*it]);
-   }
 
    return ret;
 }
@@ -226,24 +283,6 @@ void SetOne::check_equality(std::vector<bool> first_vec, std::vector<bool> secon
    std::cout << std::endl;
 
 }
-
-
-std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
-   std::vector<bool> ret;
-
-   std::vector<bool>::iterator it1 = first_vec.begin(), it1e = first_vec.end();
-   std::vector<bool>::iterator it2 = second_vec.begin(), it2e = second_vec.end();
-
-   while (it1 != it1e && it2 != it2e) {
-      ret.push_back((*it1) ^ (*it2));
-      //char temp = std::abs(str[i] - xor_with[i]) + '0';
-      //ret.append(std::string(1, temp));
-      ++it1;
-      ++it2;
-   }
-   return ret;
-}
-
 
 // xor main vec against key
 std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {

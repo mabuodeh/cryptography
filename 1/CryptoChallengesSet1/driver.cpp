@@ -14,24 +14,28 @@ int main () {
 
    std::string base64_string = SetOne::hex_to_base64(given);
 
+   std::cout << "Challenge 1" << std::endl;
    SetOne::check_equality(base64_string, output);
+   std::cout << std::endl << std::endl;
 
 
    // test for challenge 2
-   /*
+
    std::string first_hex = "1c0111001f010100061a024b53535009181c";
    std::string second_hex = "686974207468652062756c6c277320657965";
-   std::string output = "746865206b696420646f6e277420706c6179";
+   std::string output_2 = "746865206b696420646f6e277420706c6179";
 
+   std::string xor_string(SetOne::xor_hex_strings(first_hex, second_hex));
+/*
    std::vector<bool> first_bits = SetOne::hex_string_to_bits(first_hex);
    std::vector<bool> second_bits = SetOne::hex_string_to_bits(second_hex);
 
    std::vector<bool> xor_bits = SetOne::xor_against(first_bits, second_bits);
    std::string xor_string = SetOne::bits_to_hex_string(xor_bits);
-
-   SetOne::check_equality(xor_string, output);
-   */
-
+*/
+   std::cout << "Challenge 2" << std::endl;
+   SetOne::check_equality(xor_string, output_2);
+   std::cout << std::endl << std::endl;
    // test for challenge 3
    /*
    std::string given = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
