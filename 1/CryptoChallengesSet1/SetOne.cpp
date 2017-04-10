@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <math.h>
 #include <fstream>
+#include <cctype>
 
 const std::string DIR = "text_files/";
 
-/* This routine converts a hex string to a base64 string.
+/* challenge 1
+This routine converts a hex string to a base64 string.
 It will first convert the hex string to a vector of bits,
 then it will convert this vector of bits to a base64 string.
 input: hex string
@@ -22,7 +24,8 @@ std::string SetOne::hex_to_base64(std::string hex_string) {
    return ret;
 }
 
-/* This routine xor's two hex strings by first converting them to bit vectors.
+/* challenge 2
+This routine xor's two hex strings by first converting them to bit vectors.
 The xor value is then converted back to a hex string and returned
 */
 std::string SetOne::xor_hex_strings(std::string first_hex, std::string second_hex) {
@@ -40,6 +43,54 @@ std::string SetOne::xor_hex_strings(std::string first_hex, std::string second_he
    // return xor'ed string
    return ret;
 }
+
+/* challenge 3
+This routine takes a hex encoded message as an input. This message can be decoded by a single byte xor.
+The message will be xor'ed with different single byte combinations, and the result will be compared
+against a word frequency list (the list location is given in order to generate the list).
+The message and key which yields the highest frequency will be returned.
+The key that decodes the message and the final message are both returned by reference.
+*/
+void SetOne::single_byte_xor(std::string message, std::string &key, std::string &output, const std::string &freq_location) {
+   // initialize a constant container that contains the word frequency list
+   std::map<std::string, double> freq_list = gen_word_freq_table(freq_location);
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::vector<bool> final_msg, final_key;
+   double final_val = 0.0;
+
+   // convert the hex message into bits
+   std::vector<bool> bit_msg = hex_string_to_bits(message);
+   // loop 128 times (which is the number of different byte combinations)
+   for (int i = 0; i < 128; ++i) {
+      // initialize a temp container, key container, and frequency value to keep track of the values within the loop
+      std::vector<bool> temp_cont, temp_key;
+      double temp_val = 0.0;
+      // get the bit value of the loop number and store in a temp key container
+      num_to_bin(i, temp_key, HEX_OCTET_DIGIT_SZ);
+      // xor message with bit value and store in the temp output container
+      temp_cont = xor_against(bit_msg, temp_key);
+      // convert xor'ed message to an ascii string to pass to frequency calculator function
+      std::string xor_msg = bits_to_ascii_string(temp_cont);
+      // obtain frequency value by comparing words of the temp output container with the frequency word list, and assign to temp val
+      temp_val = calc_word_frequency(xor_msg, freq_list);
+
+      // if the frequency value of the temp container is higher than the current frequency value (final value)
+      if (temp_val > final_val) {
+         // store current message (found in the temp container) into the final container
+         final_msg = temp_cont;
+         // store current key (found in the temp key) into the final key
+         final_key = temp_key;
+         // store current frequency value (found in the temp value) into the final value
+         final_val = temp_val;
+      } // endif
+   } // endloop
+   // convert the final message bit vector into a string and assign it to the output
+   output = bits_to_ascii_string(final_msg);
+   // convert the final key bit vector into a string and assign it to the key output
+   key = bits_to_hex_string(final_key);
+   // - END: final values are assign by reference -
+}
+
 /* This routine converts a hex string to a vector of bits */
 std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 
@@ -94,8 +145,11 @@ std::map<int, char> SetOne::num_hex_map() {
 /* This routine converts a bit vector to a base64 string. */
 std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
    // create an int vector that stores bits in groups of six
-   std::vector<int> sixes(bin_to_num(bit_vals, BASE64_DIGIT_SZ));
+   std::vector<int> sixes;
    std::string ret;
+
+   bin_to_num(bit_vals, sixes, BASE64_DIGIT_SZ);
+
 
    // loop through the int vector, converting the int values into base64 characters, and appending them to the ret string
    for (std::vector<int>::iterator it = sixes.begin(); it != sixes.end(); ++it) {
@@ -117,6 +171,30 @@ std::string SetOne::bits_to_base64_string(std::vector<bool>& bit_vals) {
    return ret;
 
 }
+
+/* This routine converts a bit vector to an ASCII string.
+It splits the bit vector into bytes and stores them as integers.
+It then converts these integers into characters, and appends them to the final string.
+Finally, it returns this final string.
+*/
+std::string SetOne::bits_to_ascii_string(std::vector<bool>& bit_vals) {
+   // initialize string to be returned
+   std::string ret;
+
+   // convert bits into bytes, storing them as integers
+   std::vector<int> eighths;
+   bin_to_num(bit_vals, eighths, HEX_OCTET_DIGIT_SZ);
+
+   // loop through the integer container
+   for (std::vector<int>::iterator it = eighths.begin(); it != eighths.end(); ++it) {
+      // for each integer, convert into a char
+      char temp = *it;
+      // append the char to the final string
+      ret.append(1, temp);
+   } // endloop
+   // return the final string
+   return ret;
+} // end bits_to_ascii_string
 
 /* converts a numeric value to a bit vector
 input: numeric value num, bit vector bool_vals to push to, desired number of bits desired_sz */
@@ -145,18 +223,8 @@ void SetOne::num_to_bin(int num, std::vector<bool>& bool_vals, int desired_sz) {
    std::copy(temp.rbegin(), temp.rend(), std::back_inserter(bool_vals));
 }
 
-void SetOne::check_equality(std::string s1, std::string s2) {
-   std::cout << s1 << std::endl;
-   std::cout << s2 << std::endl;
-   std::cout << "equal? " << std::endl;
-   (s1 == s2) ? std::cout <<"YES" : std::cout <<"NO";
-   std::cout << std::endl;
-
-}
-
 /* This routine converts a vector of bits into a numeric value */
-std::vector<int> SetOne::bin_to_num(std::vector<bool> bit_vals, int n) {
-   std::vector<int> ret;
+void SetOne::bin_to_num(std::vector<bool> bit_vals, std::vector<int> &num_vals, int n) {
    int sum = 0, count = 0;
    int diff = n - 1;
 
@@ -167,13 +235,11 @@ std::vector<int> SetOne::bin_to_num(std::vector<bool> bit_vals, int n) {
       ++count;
       if (count == n) {
          //std::cout << " " << sum << " " << std::endl;
-         ret.push_back(sum);
+         num_vals.push_back(sum);
          count = 0;
          sum = 0;
       }
    }
-
-   return ret;
 }
 
 /* This routine converts a bit vector to a hex string */
@@ -182,7 +248,7 @@ std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
    std::vector<int> hex_quarts;
 
    // split bits into groups of four, and convert and store them in a quarts (int) vector
-   hex_quarts = bin_to_num(bits, HEX_QUART_DIGIT_SZ);
+   bin_to_num(bits, hex_quarts, HEX_QUART_DIGIT_SZ);
 
    // loop through quarts vector, converting each number to its equivalent hex value
    static std::map<int, char> hex_vals(num_hex_map());
@@ -194,37 +260,103 @@ std::string SetOne::bits_to_hex_string(std::vector<bool> bits) {
    return ret;
 }
 
-/* This routine takes two bit vectors and xors them. */
-std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
+/* This routine takes two bit vectors and xors them.
+If the bits vectors have equal length, then a bit by bit xor will occur.
+If the bit vectors are of unequal length (main vector and key vector), the key vector will be
+xor'ed against the main vector until the main vector is covered. */
+std::vector<bool> SetOne::xor_against(std::vector<bool> main_vec, std::vector<bool> key_vec) {
+   // initialize container to be returned
    std::vector<bool> ret;
 
-   std::vector<bool>::iterator it1 = first_vec.begin(), it1e = first_vec.end();
-   std::vector<bool>::iterator it2 = second_vec.begin(), it2e = second_vec.end();
+   // assign iterators the beginning and end of bit vectors
+   std::vector<bool>::iterator it1 = main_vec.begin(), it1e = main_vec.end();
+   std::vector<bool>::iterator it2 = key_vec.begin(), it2e = key_vec.end();
 
-   while (it1 != it1e && it2 != it2e) {
-      ret.push_back((*it1) ^ (*it2));
-      //char temp = std::abs(str[i] - xor_with[i]) + '0';
-      //ret.append(std::string(1, temp));
-      ++it1;
-      ++it2;
+   // loop until the end of the main vector is reached
+   while (it1 != it1e) {
+      // loop until the end of either the main vector or key vector is reached
+      while (it2 != it2e && it1 != it1e) {
+         // store the xor'ed bit in the return container
+         ret.push_back((*it1) ^ (*it2));
+         // increment main and key vector iterators
+         ++it1;
+         ++it2;
+      }
+      // when key iterator reaches the end, we must reset it to continue acting on the main vector
+      it2 = key_vec.begin();
    }
+   // return container filled with xor'ed bits
    return ret;
 }
 
-
-/*
-std::map<std::string, double> SetOne::gen_word_freq_table() {
+/* This routine generates a word frequency list from a text file */
+std::map<std::string, double> SetOne::gen_word_freq_table(const std::string &file) {
+   // initialize container to be returned
    std::map<std::string, double> ret;
-   std::string file = DIR + "word_freq_list.txt";
+   // define frequency list filename, and open file
+
    std::ifstream fin(file.c_str());
 
    std::string a;
    double b;
+   // loop through lines of the file. The first variable is the word, the second is the frequency percentage
    while(fin >> a >> b) {
+      // map each frequency percentage to its respective word
       ret[a] = b;
    }
+   // return container
    return ret;
 }
+
+/* This routine calculates the word frequency of a string.
+It checks each word to see if it exists in the given word frequency table, and assigns the respective percentage.
+*/
+double SetOne::calc_word_frequency(const std::string &str, const std::map<std::string, double> &words) {
+   // initialize frequency value to be returned
+   double ret = 0.0;
+
+   // initialize iterators for the given string
+   std::string::const_iterator i = str.begin(), j;
+   // initialize iterator for the frequency word list
+   std::map<std::string, double>::const_iterator it;
+
+   // loop through the given string until the end
+   while (i != str.end()) {
+      // reset the end iterator to point to the same location as the beginning iterator
+      j = i;
+      // increment the end iterator until the end of the string is reached or a space
+      while (j != str.end() && (*j) != ' ')
+         ++j;
+      // check whether the end iterator is still equal to the beginning iterator (meaning we reached the end of the string)
+      // if it isnt equal:
+      if (j != i) {
+         // search in the frequency list for the word between the beginning and end iterators
+         it = words.find(std::string(i,j));
+         // if the word is found:
+         if ((it != words.end()))
+            // add it's respective frequency value to the frequency value variable
+            ret += it->second;
+      }
+      // keep incrementing the end iterator until either the next word or the end of the string is reached
+      while (j != str.end() && (*j) == ' ')
+         ++j;
+      // assign the beginning iterator the value of the end iterator, to start the same process again for the next word
+      i = j;
+   }
+   // return the frequency value of the string
+   return ret;
+}
+
+void SetOne::check_equality(std::string s1, std::string s2) {
+   std::cout << s1 << std::endl;
+   std::cout << s2 << std::endl;
+   std::cout << "equal? " << std::endl;
+   (s1 == s2) ? std::cout <<"YES" : std::cout <<"NO";
+   std::cout << std::endl;
+
+}
+
+/*
 
 std::vector<bool> SetOne::bit_string_to_bit_vec(std::string char_string) {
    std::vector<bool> ret;
@@ -243,19 +375,6 @@ std::vector<bool> SetOne::bit_string_to_bit_vec(std::string char_string) {
    return ret;
 }
 
-std::string SetOne::bits_to_ascii_string(std::vector<bool>& bit_vals) {
-   std::string ret;
-
-   std::vector<int> eighths(bin_to_num(bit_vals, HEX_OCTET_DIGIT_SZ));
-
-   for (std::vector<int>::iterator it = eighths.begin(); it != eighths.end(); ++it) {
-      char temp = *it;
-      //std::cout << *it << " " << temp << std::endl;
-      ret.append(1, temp);
-   }
-
-   return ret;
-}
 
 std::vector<bool> SetOne::ascii_str_to_bit_vec(std::string str) {
    std::vector<bool> ret;
@@ -337,28 +456,22 @@ std::vector<bool> SetOne::bit_pattern(std::vector<bool>::size_type sz, std::vect
    return ret;
 }
 
-double SetOne::calc_word_frequency(std::string str) {
-   double ret = 0.0;
+*/
 
-   static std::map<std::string, double> words = gen_word_freq_table();
+/*
+std::vector<bool> SetOne::xor_against(std::vector<bool> first_vec, std::vector<bool> second_vec) {
+   std::vector<bool> ret;
 
-   std::string::iterator i = str.begin(), j;
-   std::map<std::string, double>::iterator it;
-   //std::cout << str << std::endl;
-   while (i != str.end()) {
-      j = i;
-      while (j != str.end() && (*j) != ' ')
-         ++j;
-      if (j != i) {
-         it = words.find(std::string(i,j));
-         if ((it != words.end()))
-            ret += it->second;
-      }
-      while (j != str.end() && (*j) == ' ')
-         ++j;
-      i = j;
+   std::vector<bool>::iterator it1 = first_vec.begin(), it1e = first_vec.end();
+   std::vector<bool>::iterator it2 = second_vec.begin(), it2e = second_vec.end();
+
+   while (it1 != it1e && it2 != it2e) {
+      ret.push_back((*it1) ^ (*it2));
+      //char temp = std::abs(str[i] - xor_with[i]) + '0';
+      //ret.append(std::string(1, temp));
+      ++it1;
+      ++it2;
    }
-
    return ret;
 }
 */

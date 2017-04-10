@@ -36,42 +36,20 @@ int main () {
    std::cout << "Challenge 2" << std::endl;
    SetOne::check_equality(xor_string, output_2);
    std::cout << std::endl << std::endl;
+
    // test for challenge 3
-   /*
-   std::string given = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
-   std::vector<bool> bits = SetOne::hex_string_to_bits(given);
-   std::vector<char> hex_vals = SetOne::get_hex_values();
-   std::string final_sentence;
-   double final_freq = 0.0;
-   std::string final_key;
-   for (int i = 0; i < 127; ++i) {
-   //   int i = 0x58;
-      std::string char_bits_string = SetOne::num_to_bit_string(i);
-      std::vector<bool> char_bits = SetOne::bit_string_to_bit_vec(char_bits_string);
-      std::vector<bool> bit_pattern = SetOne::bit_pattern(bits.size()/8, char_bits);
-      std::vector<bool> xor_bits = SetOne::xor_against(bits, bit_pattern);
-      // std::cout << (SetOne::bits_to_base64_string(xor_bits)) << std::endl;
-      std::cout << std::endl << "Key: ";
-      for (std::vector<bool>::iterator it = char_bits.begin(); it != char_bits.end(); ++it)
-         std::cout << *it;
-      std::string gen_sentence = SetOne::bits_to_ascii_string(xor_bits);
-      std::cout << std::endl << "Value: " << gen_sentence << std::endl;
+   std::string freq_list_location = DIR + "word_freq_list.txt";
+   std::string given_3 = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+   std::string key, message;
 
-      double temp_freq = SetOne::calc_word_frequency(gen_sentence);
-      std::cout << "temp_freq: " << temp_freq;
-      std::cout << std::endl;
+   SetOne::single_byte_xor(given, key, message, freq_list_location);
 
-      if (temp_freq > final_freq) {
-         final_freq = temp_freq;
-         final_sentence = gen_sentence;
-         final_key = char_bits_string;
-      }
-   }
-   std::cout << std::endl << std::endl << "Final key and value: "
-      << final_key << std::endl << final_sentence << std::endl
-      << "frequency value: " << final_freq << std::endl;
-   */
+   std::cout << "Challenge 3" << std::endl;
+   std::cout << "Final message: " << message << std::endl
+             << "Decrypted by the key " << key
+             << std::endl << std::endl;
+
    /*
    // Test for challenge 4
    std::string file = DIR + "4.txt";
