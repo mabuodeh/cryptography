@@ -23,7 +23,8 @@ public:
    void static single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
    // challenge 4
    void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
-
+   // challenge 5
+   void static multi_byte_key_xor(const std::string &, const std::string &, std::string &);
 
    /*
    / binary/numeric conversion functions
@@ -82,11 +83,10 @@ public:
    / Other functions
    */
 
-   // Given two boolean vectors of equal size, xor them and return the resultant boolean vector
+   // Given two boolean vectors xor them and return the resultant boolean vector.
    std::vector<bool> static xor_against(std::vector<bool> main_vec, std::vector<bool> key);
 
-   double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);//,
-                                     //const std::map<std::string, double> &);
+   double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
 
    std::string static num_to_bit_string(int);
 

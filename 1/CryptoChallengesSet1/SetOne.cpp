@@ -129,8 +129,24 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
    frequency_value = final_val;
 
    fin.close();
-   }
+}
 
+/* Challenge 5
+This string encodes a string with a key using the repeating xor technique.
+Inputs: message, key, output
+*/
+void SetOne::multi_byte_key_xor(const std::string &message, const std::string &key, std::string &output) {
+   std::vector<bool> bit_msg, bit_key;
+   // convert message from ascii characters into a bit vector
+   bit_msg = ascii_string_to_bits(message);
+   // convert key from ascii characters into a bit vector
+   bit_key = ascii_string_to_bits(key);
+   // xor message and key bits, and assign them to a bit vector
+   std::vector<bool> xor_out = xor_against(bit_msg, bit_key);
+   // convert the xor bit vector into a string and assign it to the output
+   output = bits_to_hex_string(xor_out);
+   // END - 'output' is called by reference.
+}
 
 
 /* This routine converts a hex string to a vector of bits */
@@ -153,6 +169,24 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
    // return bit container
    return bit_vals;
 }
+
+/* This routine takes an ASCII string and converts it to a bit vector */
+std::vector<bool> SetOne::ascii_string_to_bits(std::string str) {
+   // initialize container to be returned
+   std::vector<bool> ret;
+
+   // loop through the ASCII strings characters
+   for (std::string::size_type i = 0; i < str.size(); ++i) {
+      // convert each character to a numeric value
+      int temp = str[i];
+      // convert the numeric value to bits, and push them into the container
+      num_to_bin(temp, ret, HEX_OCTET_DIGIT_SZ);
+   }
+
+   // return container
+   return ret;
+}
+
 
 /* create a map container, assigning each hex digit its respective numeric value */
 std::map<char, int> SetOne::hex_num_map() {
@@ -416,18 +450,6 @@ std::vector<bool> SetOne::bit_string_to_bit_vec(std::string char_string) {
    //}
    //std::cout << std::endl;
 
-
-   return ret;
-}
-
-
-std::vector<bool> SetOne::ascii_str_to_bit_vec(std::string str) {
-   std::vector<bool> ret;
-
-   for (std::string::size_type i = 0; i < str.size(); ++i) {
-      int temp = str[i];
-      num_to_bin(temp, ret, HEX_OCTET_DIGIT_SZ);
-   }
 
    return ret;
 }

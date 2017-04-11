@@ -62,99 +62,24 @@ int main () {
 
    SetOne::multi_line_single_byte_xor(encrypted_lines_loc, key_4, message_4, freq_value_4, freq_list_location);
 
-   std::cout << "Challenge 4" << std::endl;
-   std::cout << "Final message: " << message_4 << std::endl
+   std::cout << "Challenge 4" << std::endl
+             << "Final message: " << message_4
              << "Decrypted by the key " << key_4 << std::endl
              << "Frequency value: " << freq_value_4
              << std::endl << std::endl;
 
-
-
-
-/*
-   std::string file = DIR + "4.txt";
-   std::ifstream fin(file.c_str());
-   std::string temp;
-
-   std::vector<char> hex_vals = SetOne::get_hex_values();
-
-   std::string final_sentence;
-   double final_freq = 0.0;
-   std::string final_key;
-
-   while(fin >> temp) {
-      std::vector<bool> bits = SetOne::hex_string_to_bits(temp);
-
-      for (int i = 0; i < 127; ++i) {
-         // Take hex string and convert it to a vector of bits:
-         std::string char_bits_string = SetOne::num_to_bit_string(i);
-         std::vector<bool> char_bits = SetOne::bit_string_to_bit_vec(char_bits_string);
-
-         // Create a vector bit pattern
-         std::vector<bool> bit_pattern = SetOne::bit_pattern(bits.size()/8, char_bits);
-
-         // XOR two equally sized vectors of bits
-         std::vector<bool> xor_bits = SetOne::xor_against(bits, bit_pattern);
-
-         // Printing (unnecessary)
-         // std::cout << std::endl << "Key: ";
-         // for (std::vector<bool>::iterator it = char_bits.begin(); it != char_bits.end(); ++it)
-         //   std::cout << *it;
-         // std::cout << std::endl << "Value: " << gen_sentence << std::endl;
-         // std::cout << "temp_freq: " << temp_freq;
-         // std::cout << std::endl;
-
-         // Convert vector of bits to an ASCII string
-         std::string gen_sentence = SetOne::bits_to_ascii_string(xor_bits);
-         // Get value of word frequency of ASCII string from a word frequency list
-         double temp_freq = SetOne::calc_word_frequency(gen_sentence);
-
-         // Store sentence, key, and frequency of the most relevant sentence
-         if (temp_freq > final_freq) {
-            final_freq = temp_freq;
-            final_sentence = gen_sentence;
-            final_key = char_bits_string;
-         }
-      }
-   }
-   // Print final key, value, and frequency
-   std::cout
-      << "Final key and value: "
-      << std::endl << final_key
-      << std::endl << final_sentence
-      << "Frequency value: "
-      << final_freq << std::endl;
-   */
-
    // Test for challenge 5
-   /*
-   // open ifstream file
-   std::string input_file = DIR + "5_to_encrypt.txt";
-   std::ifstream fin(input_file.c_str());
 
-   std::string expected_output = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
-a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
-   std::string key = "ICE";
+   std::string to_encode = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+   std::string encode_with_key = "ICE";
+   std::string output_5 = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
 
-   std::string line, temp;
-   while (std::getline(fin, temp)) {
-      line += temp;
-      line.append(1, '\n'); // newline for notepad files
-   }
-   // An extra '\n' is created in the end, that must be removed!
-   line.erase(line.end() - 1);
+   std::string xor_string_5;
+   SetOne::multi_byte_key_xor(to_encode, encode_with_key, xor_string_5);
 
-   // obtain bit version of string
-   std::vector<bool> ascii_line = SetOne::ascii_str_to_bit_vec(line);
+   std::cout << "Challenge 5" << std::endl;
+   SetOne::check_equality(xor_string_5, output_5);
+   std::cout << std::endl << std::endl;
 
-   // obtain bit version of key
-   std::vector<bool> static key_bits = SetOne::ascii_str_to_bit_vec(key);
-
-   // xor string against key (improved different xor method)
-   std::vector<bool> encrypted_line = SetOne::xor_against(ascii_line, key_bits);
-   std::string hex_out(SetOne::bits_to_hex_string(encrypted_line));
-
-   SetOne::check_equality(hex_out, expected_output);
-   */
    return 0;
 }
