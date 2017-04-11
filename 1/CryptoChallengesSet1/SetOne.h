@@ -20,7 +20,10 @@ public:
    // challenge 2
    std::string static xor_hex_strings(std::string first_hex, std::string second_hex);
    // challenge 3
-   void static single_byte_xor(std::string, std::string &, std::string &, const std::string &);
+   void static single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
+   // challenge 4
+   void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
+
 
    /*
    / binary/numeric conversion functions

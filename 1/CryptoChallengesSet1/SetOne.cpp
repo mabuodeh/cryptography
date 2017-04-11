@@ -49,11 +49,11 @@ This routine takes a hex encoded message as an input. This message can be decode
 The message will be xor'ed with different single byte combinations, and the result will be compared
 against a word frequency list (the list location is given in order to generate the list).
 The message and key which yields the highest frequency will be returned.
-The key that decodes the message and the final message are both returned by reference.
+The key that decodes the message, the final message, and the frequency value are returned by reference.
 */
-void SetOne::single_byte_xor(std::string message, std::string &key, std::string &output, const std::string &freq_location) {
+void SetOne::single_byte_xor(std::string message, std::string &key, std::string &output, double &frequency_value, const std::string &freq_location) {
    // initialize a constant container that contains the word frequency list
-   std::map<std::string, double> freq_list = gen_word_freq_table(freq_location);
+   std::map<std::string, double> static freq_list = gen_word_freq_table(freq_location);
    // initialize a final container, key container, and frequency value to keep track of the best decoded message
    std::vector<bool> final_msg, final_key;
    double final_val = 0.0;
@@ -88,8 +88,50 @@ void SetOne::single_byte_xor(std::string message, std::string &key, std::string 
    output = bits_to_ascii_string(final_msg);
    // convert the final key bit vector into a string and assign it to the key output
    key = bits_to_hex_string(final_key);
+
+   frequency_value = final_val;
    // - END: final values are assign by reference -
 }
+
+/* Challenge 4
+This routine deciphers hex encoded lines with a single character (byte).
+For each line read, character combinations will be xor'ed with that line,
+and the xor'ed text with the highest word frequency score will be taken.
+*/
+void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::string &key, std::string &output,
+                                       double &frequency_value, const std::string &freq_location) {
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::string final_msg, final_key;
+   double final_val = 0.0;
+
+   // open an ifstream using the file location
+   std::ifstream fin(encrypted_file_loc.c_str());
+
+   // loop until all file lines are read
+   std::string line;
+   while (fin >> line) {
+      // initialize temp container, key, and frequency value for loop
+      std::string temp_cont, temp_key;
+      double temp_val = 0.0;
+      // for each lines, obtain the the container and key with the highest frequency value
+      single_byte_xor(line, temp_key, temp_cont, temp_val, freq_location);
+      // if the temp frequency value is higher than the stored frequency value (final)
+      if (temp_val > final_val) {
+         // replace the final container and key with newly received values
+         final_msg = temp_cont;
+         final_key = temp_key;
+         final_val = temp_val;
+      } // endif
+   } // endloop
+   // assign key, output, and frequency value to the referenced variables
+   output = final_msg;
+   key = final_key;
+   frequency_value = final_val;
+
+   fin.close();
+   }
+
+
 
 /* This routine converts a hex string to a vector of bits */
 std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
@@ -304,6 +346,9 @@ std::map<std::string, double> SetOne::gen_word_freq_table(const std::string &fil
       // map each frequency percentage to its respective word
       ret[a] = b;
    }
+
+   fin.close();
+
    // return container
    return ret;
 }

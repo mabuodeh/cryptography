@@ -42,16 +42,36 @@ int main () {
    std::string freq_list_location = DIR + "word_freq_list.txt";
    std::string given_3 = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
    std::string key, message;
+   double freq_value = 0.0;
 
-   SetOne::single_byte_xor(given, key, message, freq_list_location);
+   SetOne::single_byte_xor(given, key, message, freq_value, freq_list_location);
 
    std::cout << "Challenge 3" << std::endl;
    std::cout << "Final message: " << message << std::endl
-             << "Decrypted by the key " << key
+             << "Decrypted by the key " << key << std::endl
+             << "Frequency value: " << freq_value
              << std::endl << std::endl;
 
-   /*
+
    // Test for challenge 4
+
+   std::string freq_list_location_ch4 = DIR + "word_freq_list.txt";
+   std::string encrypted_lines_loc = DIR + "4.txt";
+   std::string key_4, message_4;
+   double freq_value_4 = 0.0;
+
+   SetOne::multi_line_single_byte_xor(encrypted_lines_loc, key_4, message_4, freq_value_4, freq_list_location);
+
+   std::cout << "Challenge 4" << std::endl;
+   std::cout << "Final message: " << message_4 << std::endl
+             << "Decrypted by the key " << key_4 << std::endl
+             << "Frequency value: " << freq_value_4
+             << std::endl << std::endl;
+
+
+
+
+/*
    std::string file = DIR + "4.txt";
    std::ifstream fin(file.c_str());
    std::string temp;
