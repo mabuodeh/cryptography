@@ -1,10 +1,9 @@
 # cryptography
 Learning cryptography and using c++
 
-Added more functionality; strings to hex or base64, xor on bits, etc..
+Code refactored, planning out challenge 6
 
 Tasks:
 
-xor_against changed!!! make sure it's refactored to accommodate all tests!
-
-Refactor check_equality function to be generic
+For challenges 3 and 6
+Replace word frequency with character frequency. Use the chi-squared formula

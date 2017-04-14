@@ -51,7 +51,7 @@ against a word frequency list (the list location is given in order to generate t
 The message and key which yields the highest frequency will be returned.
 The key that decodes the message, the final message, and the frequency value are returned by reference.
 */
-void SetOne::single_byte_xor(std::string message, std::string &key, std::string &output, double &frequency_value, const std::string &freq_location) {
+void SetOne::get_key_by_word_list(std::string message, std::string &key, std::string &output, double &frequency_value, const std::string &freq_location) {
    // initialize a constant container that contains the word frequency list
    std::map<std::string, double> static freq_list = gen_word_freq_table(freq_location);
    // initialize a final container, key container, and frequency value to keep track of the best decoded message
@@ -93,6 +93,50 @@ void SetOne::single_byte_xor(std::string message, std::string &key, std::string 
    // - END: final values are assign by reference -
 }
 
+/* Still challenge 5, but using character frequency rather word frequency */
+void SetOne::get_key_by_char_list(std::string message, std::string &key, std::string &output, double &frequency_value, const std::string &freq_location) {
+   // initialize a constant container that contains the word frequency list
+   std::map<char, double> static freq_list = gen_char_freq_table(freq_location);
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::vector<bool> final_msg, final_key;
+   double final_val = 0.0;
+
+   // convert the hex message into bits
+   std::vector<bool> bit_msg = hex_string_to_bits(message);
+   // loop 128 times (which is the number of different byte combinations)
+   for (int i = 0; i < 128; ++i) {
+      // initialize a temp container, key container, and frequency value to keep track of the values within the loop
+      std::vector<bool> temp_cont, temp_key;
+      double temp_val = 0.0;
+      // get the bit value of the loop number and store in a temp key container
+      num_to_bin(i, temp_key, HEX_OCTET_DIGIT_SZ);
+      // xor message with bit value and store in the temp output container
+      temp_cont = xor_against(bit_msg, temp_key);
+      // convert xor'ed message to an ascii string to pass to frequency calculator function
+      std::string xor_msg = bits_to_ascii_string(temp_cont);
+      // obtain frequency value by comparing words of the temp output container with the frequency word list, and assign to temp val
+      temp_val = calc_char_frequency(xor_msg, freq_list);
+
+      // if the frequency value of the temp container is higher than the current frequency value (final value)
+      if (temp_val > final_val) {
+         // store current message (found in the temp container) into the final container
+         final_msg = temp_cont;
+         // store current key (found in the temp key) into the final key
+         final_key = temp_key;
+         // store current frequency value (found in the temp value) into the final value
+         final_val = temp_val;
+      } // endif
+   } // endloop
+   // convert the final message bit vector into a string and assign it to the output
+   output = bits_to_ascii_string(final_msg);
+   // convert the final key bit vector into a string and assign it to the key output
+   key = bits_to_hex_string(final_key);
+
+   frequency_value = final_val;
+   // - END: final values are assign by reference -
+}
+
+
 /* Challenge 4
 This routine deciphers hex encoded lines with a single character (byte).
 For each line read, character combinations will be xor'ed with that line,
@@ -114,7 +158,7 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
       std::string temp_cont, temp_key;
       double temp_val = 0.0;
       // for each lines, obtain the the container and key with the highest frequency value
-      single_byte_xor(line, temp_key, temp_cont, temp_val, freq_location);
+      get_key_by_word_list(line, temp_key, temp_cont, temp_val, freq_location);
       // if the temp frequency value is higher than the stored frequency value (final)
       if (temp_val > final_val) {
          // replace the final container and key with newly received values
@@ -146,6 +190,69 @@ void SetOne::multi_byte_key_xor(const std::string &message, const std::string &k
    // convert the xor bit vector into a string and assign it to the output
    output = bits_to_hex_string(xor_out);
    // END - 'output' is called by reference.
+}
+
+/* Challenge 6
+This routine takes a file of encrypted lines.
+It will first determine the length of the key using hamming distance.
+It will then use this information to decrypted the message based on combinations.
+The message information with the best frequency will be returned.
+*/
+void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std::string o_key) {
+   // open file i_file
+   std::ifstream fin(i_file.c_str());
+   // check if file opened
+   if (fin == NULL)
+      std::cerr << "6.txt not opening!" << std::endl;
+   // read lines into an encrypted_message string
+   std::string encrypted_msg, temp;
+   while (fin >> temp) {
+      encrypted_msg.append(temp);
+   }
+
+   // -step one: find the smallest normalized value (quotient)-
+   int final_quotient = 10000.0;
+   std::vector<int> keysize_vals;
+   // loop through keysize from 2 to 40 (this is the number of characters the key can be)
+   for (int i = 2; i <= 40; ++i) {
+      // initialize keysize
+      int keysize = i;
+      // obtain a keysize number of bytes (characters), twice. We now have two blocks of keysize bytes each.
+      // obtain first keysize characters [0, keysize)
+      std::string first_chars(encrypted_msg.begin(), encrypted_msg.begin() + keysize);
+      // obtain second keysize characters [keysize, keysize * 2)
+      std::string second_chars(encrypted_msg.begin() + keysize, encrypted_msg.begin() + keysize + keysize * 2);
+      // convert these two character blocks into bits
+      std::vector<bool> first_block = ascii_string_to_bits(first_chars);
+      std::vector<bool> second_block = ascii_string_to_bits(second_chars);
+      // find the hamming distance of the blocks
+      int ham_dis = get_hamming_distance(first_block, second_block);
+      // divide the hamming distance by the keysize
+      int temp_quotient = ham_dis / keysize;
+      // if the quotient is less than the previously stored quotient
+      if (temp_quotient < final_quotient) {
+         // clear all old keysize values
+         keysize_vals.clear();
+         // push the current one in
+         keysize_vals.push_back(keysize);
+         // replace the temporarily stored quotient with the current quotient
+         final_quotient = temp_quotient;
+      } // else if the quotient is the same
+      else if (temp_quotient == final_quotient) {
+         // add it to the vector
+         keysize_vals.push_back(keysize);
+      }
+   } // endloop
+   // print out the keysize
+   std::cout << "final_quotient: " << final_quotient << std::endl << "keysize values: " <<std::endl;
+   for (int j = 0; j < keysize_vals.size(); ++j)
+      std::cout << keysize_vals[j] << " ";
+   std::cout << std::endl;
+
+   // - step two: get all the keysizes with final_quotient
+   //
+
+
 }
 
 
@@ -387,6 +494,28 @@ std::map<std::string, double> SetOne::gen_word_freq_table(const std::string &fil
    return ret;
 }
 
+/* This routine generates a char frequency list from a text file */
+std::map<char, double> SetOne::gen_char_freq_table(const std::string &file) {
+   // initialize container to be returned
+   std::map<char, double> ret;
+   // define frequency list filename, and open file
+
+   std::ifstream fin(file.c_str());
+
+   char a;
+   double b;
+   // loop through lines of the file. The first variable is the word, the second is the frequency percentage
+   while(fin >> a >> b) {
+      // map each frequency percentage to its respective word
+      ret[a] = b;
+   }
+
+   fin.close();
+
+   // return container
+   return ret;
+}
+
 /* This routine calculates the word frequency of a string.
 It checks each word to see if it exists in the given word frequency table, and assigns the respective percentage.
 */
@@ -426,6 +555,27 @@ double SetOne::calc_word_frequency(const std::string &str, const std::map<std::s
    return ret;
 }
 
+/* This routine calculates the character frequency of a string. */
+double SetOne::calc_char_frequency(const std::string &str, const std::map<char, double> &char_list) {
+   // initialize frequency value to be returned
+   double ret = 0.0;
+
+   // initialize iterators for the given string
+   std::string::const_iterator i = str.begin();
+   // initialize iterator for the frequency char list
+   std::map<char, double>::const_iterator it;
+
+   // loop through the given string until the end
+   while (i != str.end()) {
+      it = char_list.find(std::tolower(*i));
+      if (it != char_list.end())
+         ret += it->second;
+      ++i;
+   }
+   // return the frequency value of the string
+   return ret;
+}
+
 void SetOne::check_equality(std::string s1, std::string s2) {
    std::cout << s1 << std::endl;
    std::cout << s2 << std::endl;
@@ -433,6 +583,28 @@ void SetOne::check_equality(std::string s1, std::string s2) {
    (s1 == s2) ? std::cout <<"YES" : std::cout <<"NO";
    std::cout << std::endl;
 
+}
+
+/* This routine calculates the hamming distance of two boolean vectors */
+int SetOne::get_hamming_distance(std::vector<bool> first_vec, std::vector<bool> second_vec) {
+   // initialize return value
+   int ret = 0;
+   // get the xor value of the two bit vectors
+   std::vector<bool> xor_val = xor_against(first_vec, second_vec);
+   // initialize iterator to the beginning of xor vector
+   std::vector<bool>::iterator it = xor_val.begin();
+   // loop through each bit of the xor vector
+   while (it != xor_val.end()) {
+      // if the bit in the vector is 1
+      if ((*it) == 1) {
+         // increment ret
+         ++ret;
+      } // endif
+      // increment it
+      ++it;
+   } // endloop
+   // return ret
+   return ret;
 }
 
 /*

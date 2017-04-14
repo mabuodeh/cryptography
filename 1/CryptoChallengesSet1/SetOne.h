@@ -20,11 +20,14 @@ public:
    // challenge 2
    std::string static xor_hex_strings(std::string first_hex, std::string second_hex);
    // challenge 3
-   void static single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
+   void static get_key_by_word_list(std::string, std::string &, std::string &, double &, const std::string &);
+   void static get_key_by_char_list(std::string, std::string &, std::string &, double &, const std::string &);
    // challenge 4
    void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
    // challenge 5
    void static multi_byte_key_xor(const std::string &, const std::string &, std::string &);
+   // challenge 6
+   void static break_repeating_key_xor(std::string, std::string, std::string);
 
    /*
    / binary/numeric conversion functions
@@ -45,6 +48,7 @@ public:
    std::map<int, char> static num_hex_map();
    // Returns a map of character frequencies
    std::map<std::string, double> static gen_word_freq_table(const std::string &);
+   std::map<char, double> static gen_char_freq_table(const std::string &);
 
    /*
    / Type to bits conversion
@@ -86,33 +90,18 @@ public:
    // Given two boolean vectors xor them and return the resultant boolean vector.
    std::vector<bool> static xor_against(std::vector<bool> main_vec, std::vector<bool> key);
 
+   // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
+   double static calc_char_frequency(const std::string &, const std::map<char, double> &);
 
-   std::string static num_to_bit_string(int);
+   // Given two bit vectors, return the hamming distance
+   int static get_hamming_distance(std::vector<bool>, std::vector<bool>);
+
 
    // not used yet
+   std::string static num_to_bit_string(int);
    std::string static bit_string_pattern(int, std::string);
    std::vector<bool> static bit_pattern(std::vector<bool>::size_type, std::vector<bool>);
-
-   // review bits_to_sixes
-
-
-   // std::vector<bool> base64_string_to_bits(const std::string&);
-   /*
-   template<class T>
-   static void check_equality(T itb, T ite, T iter){
-      typename T i;
-      for (i = itb; i != ite; ++i) {
-         std::cout << *i;
-      }
-         //std::cout << s1 << std::endl;
-         //std::cout << s2 << std::endl;
-         std::cout << "equal? ";
-         //(s1 == s2) ? std::cout <<"YES" : std::cout <<"NO";
-         std::cout << std::endl;
-
-   }
-   */
 
 };
 

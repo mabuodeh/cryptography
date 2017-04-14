@@ -44,12 +44,26 @@ int main () {
    std::string key, message;
    double freq_value = 0.0;
 
-   SetOne::single_byte_xor(given, key, message, freq_value, freq_list_location);
+   SetOne::get_key_by_word_list(given, key, message, freq_value, freq_list_location);
 
-   std::cout << "Challenge 3" << std::endl;
+   std::cout << "Challenge 3a: by word list" << std::endl;
    std::cout << "Final message: " << message << std::endl
              << "Decrypted by the key " << key << std::endl
              << "Frequency value: " << freq_value
+             << std::endl << std::endl;
+
+
+   std::string char_freq_list_location = DIR + "char_freq_list.txt";
+   std::string given_3b = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+   std::string key_3b, message_3b;
+   double freq_value_3b = 0.0;
+
+   SetOne::get_key_by_char_list(given_3b, key_3b, message_3b, freq_value_3b, char_freq_list_location);
+
+   std::cout << "Challenge 3b: by char list" << std::endl;
+   std::cout << "Final message: " << message_3b << std::endl
+             << "Decrypted by the key " << key_3b << std::endl
+             << "Frequency value: " << freq_value_3b
              << std::endl << std::endl;
 
 
@@ -81,5 +95,14 @@ int main () {
    SetOne::check_equality(xor_string_5, output_5);
    std::cout << std::endl << std::endl;
 
+   // Test for challenge 6
+
+   std::string cha6 = DIR + "6.txt";
+   std::string o_msg_6, o_key_6;
+   // send filename to function
+   std::cout << "Challenge 6: " << std::endl;
+   SetOne::break_repeating_key_xor(cha6, o_msg_6, o_key_6);
+
    return 0;
+
 }
