@@ -52,13 +52,11 @@ int main () {
              << "Frequency value: " << freq_value
              << std::endl << std::endl;
 
-
-   std::string char_freq_list_location = DIR + "char_freq_list.txt";
-   std::string given_3b = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+   //std::string given_3b = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
    std::string key_3b, message_3b;
    double freq_value_3b = 0.0;
 
-   SetOne::get_key_by_char_list(given_3b, key_3b, message_3b, freq_value_3b, char_freq_list_location);
+   SetOne::get_key_by_char_list(given_3, key_3b, message_3b, freq_value_3b);
 
    std::cout << "Challenge 3b: by char list" << std::endl;
    std::cout << "Final message: " << message_3b << std::endl

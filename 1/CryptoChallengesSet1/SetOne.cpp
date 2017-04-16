@@ -94,9 +94,7 @@ void SetOne::get_key_by_word_list(std::string message, std::string &key, std::st
 }
 
 /* Still challenge 5, but using character frequency rather word frequency */
-void SetOne::get_key_by_char_list(std::string message, std::string &key, std::string &output, double &frequency_value, const std::string &freq_location) {
-   // initialize a constant container that contains the word frequency list
-   std::map<char, double> static freq_list = gen_char_freq_table(freq_location);
+void SetOne::get_key_by_char_list(std::string message, std::string &key, std::string &output, double &frequency_value) {
    // initialize a final container, key container, and frequency value to keep track of the best decoded message
    std::vector<bool> final_msg, final_key;
    double final_val = 0.0;
@@ -104,7 +102,7 @@ void SetOne::get_key_by_char_list(std::string message, std::string &key, std::st
    // convert the hex message into bits
    std::vector<bool> bit_msg = hex_string_to_bits(message);
    // loop 128 times (which is the number of different byte combinations)
-   for (int i = 0; i < 128; ++i) {
+   for (int i = 0; i < 127; ++i) {
       // initialize a temp container, key container, and frequency value to keep track of the values within the loop
       std::vector<bool> temp_cont, temp_key;
       double temp_val = 0.0;
@@ -115,7 +113,7 @@ void SetOne::get_key_by_char_list(std::string message, std::string &key, std::st
       // convert xor'ed message to an ascii string to pass to frequency calculator function
       std::string xor_msg = bits_to_ascii_string(temp_cont);
       // obtain frequency value by comparing words of the temp output container with the frequency word list, and assign to temp val
-      temp_val = calc_char_frequency(xor_msg, freq_list);
+      temp_val = calc_char_frequency(xor_msg);
 
       // if the frequency value of the temp container is higher than the current frequency value (final value)
       if (temp_val > final_val) {
@@ -556,24 +554,44 @@ double SetOne::calc_word_frequency(const std::string &str, const std::map<std::s
 }
 
 /* This routine calculates the character frequency of a string. */
-double SetOne::calc_char_frequency(const std::string &str, const std::map<char, double> &char_list) {
-   // initialize frequency value to be returned
-   double ret = 0.0;
+double SetOne::calc_char_frequency(const std::string &str) {
+   // initialize letter count
+   int letter_count = 0;
+   // create a map to keep track of frequency of letters
+   std::map<char, double> char_list;
+   // initialize an index of coincidence variable
+   double indCo = 0.0;
 
    // initialize iterators for the given string
-   std::string::const_iterator i = str.begin();
-   // initialize iterator for the frequency char list
-   std::map<char, double>::const_iterator it;
+   std::string::const_iterator it = str.begin();
+   //loop through the string for each character
+   while (it != str.end()) {
+      // if the character is a letter
+      if (('A' <= (*it) && (*it) <= 'Z') || ('a' <= (*it) && (*it) <= 'z') || ((*it) == ' ')) {
+         // increment that character within the map
+         ++char_list[*it];
+         // increment letter count
 
-   // loop through the given string until the end
-   while (i != str.end()) {
-      it = char_list.find(std::tolower(*i));
-      if (it != char_list.end())
-         ret += it->second;
-      ++i;
-   }
-   // return the frequency value of the string
-   return ret;
+      } // endif
+      // increment iterator
+      ++letter_count;
+      ++it;
+   } // endloop
+
+   // index of coincidence:
+   // loop through the character map
+   std::map<char, double>::iterator map_it = char_list.begin();
+   while (map_it != char_list.end()) {
+      // add to the indCo variable the product of the character value with the character value - 1
+      indCo += ((map_it->second) * (map_it->second - 1));
+      // increment it
+      ++map_it;
+   } // end loop
+   // divide indCo by the product of the total letter count and the total letter count - 1
+   indCo /= (letter_count) * (letter_count - 1);
+
+   // return indCo
+   return indCo;
 }
 
 void SetOne::check_equality(std::string s1, std::string s2) {

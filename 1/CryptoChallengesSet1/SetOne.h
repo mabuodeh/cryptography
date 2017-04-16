@@ -21,7 +21,7 @@ public:
    std::string static xor_hex_strings(std::string first_hex, std::string second_hex);
    // challenge 3
    void static get_key_by_word_list(std::string, std::string &, std::string &, double &, const std::string &);
-   void static get_key_by_char_list(std::string, std::string &, std::string &, double &, const std::string &);
+   void static get_key_by_char_list(std::string, std::string &, std::string &, double &);
    // challenge 4
    void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
    // challenge 5
@@ -92,7 +92,7 @@ public:
 
    // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
-   double static calc_char_frequency(const std::string &, const std::map<char, double> &);
+   double static calc_char_frequency(const std::string &);
 
    // Given two bit vectors, return the hamming distance
    int static get_hamming_distance(std::vector<bool>, std::vector<bool>);
