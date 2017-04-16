@@ -93,6 +93,47 @@ void SetOne::get_key_by_word_list(std::string message, std::string &key, std::st
    // - END: final values are assign by reference -
 }
 
+/* Still challenge 3, but using character frequency rather word frequency */
+void SetOne::get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value) {
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::vector<bool> final_msg, final_key;
+   double final_val = 0.0;
+
+   // convert the hex message into bits
+   std::vector<bool> bit_msg = hex_string_to_bits(message);
+   // loop 128 times (which is the number of different byte combinations)
+   for (int i = 0; i < 127; ++i) {
+      // initialize a temp container, key container, and frequency value to keep track of the values within the loop
+      std::vector<bool> temp_cont, temp_key;
+      double temp_val = 0.0;
+      // get the bit value of the loop number and store in a temp key container
+      num_to_bin(i, temp_key, HEX_OCTET_DIGIT_SZ);
+      // xor message with bit value and store in the temp output container
+      temp_cont = xor_against(bit_msg, temp_key);
+      // convert xor'ed message to an ascii string to pass to frequency calculator function
+      std::string xor_msg = bits_to_ascii_string(temp_cont);
+      // obtain frequency value by comparing words of the temp output container with the frequency word list, and assign to temp val
+      temp_val = calc_char_frequency(xor_msg);
+
+      // if the frequency value of the temp container is higher than the current frequency value (final value)
+      if (temp_val > final_val) {
+         // store current message (found in the temp container) into the final container
+         final_msg = temp_cont;
+         // store current key (found in the temp key) into the final key
+         final_key = temp_key;
+         // store current frequency value (found in the temp value) into the final value
+         final_val = temp_val;
+      } // endif
+   } // endloop
+   // convert the final message bit vector into a string and assign it to the output
+   output = bits_to_ascii_string(final_msg);
+   // convert the final key bit vector into a string and assign it to the key output
+   key = bits_to_hex_string(final_key);
+
+   frequency_value = final_val;
+   // - END: final values are assign by reference -
+}
+
 /* Challenge 4
 This routine deciphers hex encoded lines with a single character (byte).
 For each line read, character combinations will be xor'ed with that line,
@@ -148,47 +189,6 @@ void SetOne::multi_byte_key_xor(const std::string &message, const std::string &k
    // END - 'output' is called by reference.
 }
 
-/* Still challenge 5, but using character frequency rather word frequency */
-void SetOne::get_key_by_char_list(std::string message, std::string &key, std::string &output, double &frequency_value) {
-   // initialize a final container, key container, and frequency value to keep track of the best decoded message
-   std::vector<bool> final_msg, final_key;
-   double final_val = 0.0;
-
-   // convert the hex message into bits
-   std::vector<bool> bit_msg = hex_string_to_bits(message);
-   // loop 128 times (which is the number of different byte combinations)
-   for (int i = 0; i < 127; ++i) {
-      // initialize a temp container, key container, and frequency value to keep track of the values within the loop
-      std::vector<bool> temp_cont, temp_key;
-      double temp_val = 0.0;
-      // get the bit value of the loop number and store in a temp key container
-      num_to_bin(i, temp_key, HEX_OCTET_DIGIT_SZ);
-      // xor message with bit value and store in the temp output container
-      temp_cont = xor_against(bit_msg, temp_key);
-      // convert xor'ed message to an ascii string to pass to frequency calculator function
-      std::string xor_msg = bits_to_ascii_string(temp_cont);
-      // obtain frequency value by comparing words of the temp output container with the frequency word list, and assign to temp val
-      temp_val = calc_char_frequency(xor_msg);
-
-      // if the frequency value of the temp container is higher than the current frequency value (final value)
-      if (temp_val > final_val) {
-         // store current message (found in the temp container) into the final container
-         final_msg = temp_cont;
-         // store current key (found in the temp key) into the final key
-         final_key = temp_key;
-         // store current frequency value (found in the temp value) into the final value
-         final_val = temp_val;
-      } // endif
-   } // endloop
-   // convert the final message bit vector into a string and assign it to the output
-   output = bits_to_ascii_string(final_msg);
-   // convert the final key bit vector into a string and assign it to the key output
-   key = bits_to_hex_string(final_key);
-
-   frequency_value = final_val;
-   // - END: final values are assign by reference -
-}
-
 /* Challenge 6
 This routine takes a file of encrypted lines.
 It will first determine the length of the key using hamming distance.
@@ -209,48 +209,21 @@ void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std:
       encrypted_msg.append(temp);
    }
 
-   // -step one: find the smallest normalized value (quotient)-
-   double final_quotient = 10000.0;
-   std::vector<int> keysize_vals;
-   // loop through keysize from 2 to 40 (this is the number of characters the key can be)
-   for (int i = 2; i <= 40; ++i) {
-      // initialize keysize
-      int keysize = i;
-      // obtain a keysize number of bytes (characters), twice. We now have two blocks of keysize bytes each.
-      // obtain first keysize characters [0, keysize)
-      std::string first_chars(encrypted_msg.begin(), encrypted_msg.begin() + keysize);
-      // obtain second keysize characters [keysize, keysize * 2)
-      std::string second_chars(encrypted_msg.begin() + keysize, encrypted_msg.begin() + keysize + keysize * 2);
-      // convert these two character blocks into bits
-      std::vector<bool> first_block = ascii_string_to_bits(first_chars);
-      std::vector<bool> second_block = ascii_string_to_bits(second_chars);
-      // find the hamming distance of the blocks
-      int ham_dis = get_hamming_distance(first_block, second_block);
-      // divide the hamming distance by the keysize
-      double temp_quotient = double(ham_dis) / double(keysize);
-      // if the quotient is less than the previously stored quotient
-      if (temp_quotient < final_quotient) {
-         // clear all old keysize values
-         keysize_vals.clear();
-         // push the current one in
-         keysize_vals.push_back(keysize);
-         // replace the temporarily stored quotient with the current quotient
-         final_quotient = temp_quotient;
-      } // else if the quotient is the same
-      else if (temp_quotient == final_quotient) {
-         // add it to the vector
-         keysize_vals.push_back(keysize);
-      }
-   } // endloop
+   // step one: find the probable keysize
+   int keysize = get_keysize(encrypted_msg);
+
    // print out the keysize
-   std::cout << "final_quotient: " << final_quotient << std::endl << "keysize values: " <<std::endl;
-   for (int j = 0; j < keysize_vals.size(); ++j)
-      std::cout << keysize_vals[j] << " ";
-   std::cout << std::endl;
+   std::cout << "keysize: " << keysize << std::endl;
 
-   // - step two: get all the keysizes with final_quotient
-   //
+   // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
+   // split the encrypted message based on the keysize, all si characters in one string, etc..
+   // std::vector<std:string>
+   // loop through each string of key characters
+      // get the character with the best index of coincidence
+      // append it to the final key
+   // endloop
 
+   // using the supposed key, decrypt the message
 
 }
 
@@ -624,6 +597,38 @@ int SetOne::get_hamming_distance(std::vector<bool> first_vec, std::vector<bool> 
    } // endloop
    // return ret
    return ret;
+}
+/* This routine gets assumed keysize of a ciphertext using hamming distance */
+int SetOne::get_keysize(const std::string &encrypted_msg) {
+
+   double final_quotient = 10000.0;
+   int keysize = 0;
+   // loop through keysize from 2 to 40 (this is the number of characters the key can be)
+   for (int i = 2; i <= 40; ++i) {
+      // initialize keysize
+      int temp_keysize = i;
+      // obtain a keysize number of bytes (characters), twice. We now have two blocks of keysize bytes each.
+      // obtain first keysize characters [0, keysize)
+      std::string first_chars(encrypted_msg.begin(), encrypted_msg.begin() + temp_keysize);
+      // obtain second keysize characters [keysize, keysize * 2)
+      std::string second_chars(encrypted_msg.begin() + temp_keysize, encrypted_msg.begin() + temp_keysize + temp_keysize * 2);
+      // convert these two character blocks into bits
+      std::vector<bool> first_block = ascii_string_to_bits(first_chars);
+      std::vector<bool> second_block = ascii_string_to_bits(second_chars);
+      // find the hamming distance of the blocks
+      int ham_dis = get_hamming_distance(first_block, second_block);
+      // divide the hamming distance by the keysize
+      double temp_quotient = double(ham_dis) / double(temp_keysize);
+      // if the quotient is less than the previously stored quotient
+      if (temp_quotient < final_quotient) {
+         // clear all old keysize values
+         keysize = temp_keysize;
+         // replace the temporarily stored quotient with the current quotient
+         final_quotient = temp_quotient;
+      }
+   } // endloop
+
+   return keysize;
 }
 
 /*

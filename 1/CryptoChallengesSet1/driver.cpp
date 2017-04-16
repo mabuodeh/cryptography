@@ -56,7 +56,7 @@ int main () {
    std::string key_3b, message_3b;
    double freq_value_3b = 0.0;
 
-   SetOne::get_key_by_char_list(given_3, key_3b, message_3b, freq_value_3b);
+   SetOne::get_key_by_index_of_co(given_3, key_3b, message_3b, freq_value_3b);
 
    std::cout << "Challenge 3b: by char list" << std::endl;
    std::cout << "Final message: " << message_3b << std::endl

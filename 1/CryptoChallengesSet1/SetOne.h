@@ -21,7 +21,7 @@ public:
    std::string static xor_hex_strings(std::string first_hex, std::string second_hex);
    // challenge 3
    void static get_key_by_word_list(std::string, std::string &, std::string &, double &, const std::string &);
-   void static get_key_by_char_list(std::string, std::string &, std::string &, double &);
+   void static get_key_by_index_of_co(std::string, std::string &, std::string &, double &);
    // challenge 4
    void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
    // challenge 5
@@ -89,6 +89,12 @@ public:
 
    // Given two boolean vectors xor them and return the resultant boolean vector.
    std::vector<bool> static xor_against(std::vector<bool> main_vec, std::vector<bool> key);
+
+   /*
+   / Polyalphabetic (Vigenere) functions
+   */
+
+   int static get_keysize(const std::string &);
 
    // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
