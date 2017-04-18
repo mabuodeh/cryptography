@@ -249,6 +249,45 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
    return bit_vals;
 }
 
+/* This routine takes a base64 string string and converts it to a bit vector */
+std::vector<bool> SetOne::base64_string_to_bits(std::string str) {
+   std::vector<bool> ret;
+   std::cout << "in base64 to bits" << std::endl;
+
+   // loop through the base64 string
+   std::string::const_iterator it;
+   for (it = str.begin(); it != str.end(); ++it) {
+      // for every character, convert the character into 6 bits and store it in the return vector
+      int temp = 0;
+      // if the character is between A and Z
+      if ('A' <= *it && *it <= 'Z')
+         // get the int value of the letter (which is ascii) and subtract 65 (to normalize)
+         temp = std::abs(65 - (int(*it)));
+      // if the character is between a and z
+      else if ('a' <= *it && *it <= 'z')
+         // get the int value of the letter (which is ascii) and subtract 71 (to normalize)
+         temp = std::abs(71 - (int(*it)));
+      // if the character is between 0 and 9
+      else if ('0' <= *it && *it <= '9')
+         // get the int value of the letter (which is ascii) and add 4 (to normalize)
+         temp = std::abs(4 + (int(*it)));
+      // if +
+      else if ('+' == *it)
+         // add 19
+         temp = std::abs(19 + (int(*it)));
+      // if /
+      else if ('/' == *it)
+         // add 16
+         temp = std::abs(16 + (int(*it)));
+      // = not used
+
+      // get the bit value of the number
+      // store the bit value in the bit vector
+      num_to_bin(temp, ret, BASE64_DIGIT_SZ);
+   }
+   return ret;
+}
+
 /* This routine takes an ASCII string and converts it to a bit vector */
 std::vector<bool> SetOne::ascii_string_to_bits(std::string str) {
    // initialize container to be returned

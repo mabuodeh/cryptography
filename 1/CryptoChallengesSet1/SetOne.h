@@ -56,6 +56,8 @@ public:
 
    // Converts a hex string into bits, storing the bits in a boolean vector
    std::vector<bool> static hex_string_to_bits(std::string);
+   // Converts a base64 string into bits, storing the bits in a boolean vector
+   std::vector<bool> static base64_string_to_bits(std::string);
    // Converts a char string into bits, storing the bits in a boolean vector
    std::vector<bool> static bit_string_to_bits(std::string);
    // Given ASCII string, convert to bit vector
