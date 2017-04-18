@@ -244,8 +244,8 @@ void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std:
    //int keysize = get_keysize(encrypted_msg);
    //int keysize = 6;
 
-   std::vector<bool> bit_msg = ba
-   std::string encrypted_msg
+   std::vector<bool> bit_msg = base64_string_to_bits(base64_msg);
+   std::string encrypted_msg = bits_to_ascii_string(bit_msg);
 
    for (int keysize = 2; keysize <= 40; ++keysize) {
 
@@ -254,19 +254,19 @@ void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std:
 
       // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
       // split the encrypted message based on the keysize, all si characters in one string, etc..
-      std::vector<std::string> transposed_strings = transpose_string(encrypted_msg, keysize);
+      std::vector<std::vector<bool> > transposed_bits = transpose_bit_vector(bit_msg, keysize);
 
       // initialize string to keep track of the key;
       std::string final_key;
 
       // loop through each string of key characters
-      for (std::vector<std::string>::const_iterator t_str = transposed_strings.begin(); t_str != transposed_strings.end(); ++t_str) {
+      for (std::vector<std::vector<bool> >::iterator t_str = transposed_bits.begin(); t_str != transposed_bits.end(); ++t_str) {
          // get the character with the best index of coincidence
          std::string temp_key_val;
          std::string not_needed_str;
          double not_needed_double = 0.0;
-         // get_key_by_index_of_co(*t_str, temp_key_val, not_needed_str, not_needed_double);
-         multi_line_single_byte_xor_string(*t_str, temp_key_val, not_needed_str, not_needed_double);
+         std::string one_line(bits_to_ascii_string(*t_str));
+         multi_line_single_byte_xor_string(one_line, temp_key_val, not_needed_str, not_needed_double);
          // append it to the final key
          std::vector<int> int_val;
          bin_to_num(hex_string_to_bits(temp_key_val), int_val, 8);
@@ -309,6 +309,45 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 
    // return bit container
    return bit_vals;
+}
+
+/* This routine takes a base64 string string and converts it to a bit vector */
+std::vector<bool> SetOne::base64_string_to_bits(std::string str) {
+   std::vector<bool> ret;
+   std::cout << "in base64 to bits" << std::endl;
+
+   // loop through the base64 string
+   std::string::const_iterator it;
+   for (it = str.begin(); it != str.end(); ++it) {
+      // for every character, convert the character into 6 bits and store it in the return vector
+      int temp = 0;
+      // if the character is between A and Z
+      if ('A' <= *it && *it <= 'Z')
+         // get the int value of the letter (which is ascii) and subtract 65 (to normalize)
+         temp = std::abs(65 - (int(*it)));
+      // if the character is between a and z
+      else if ('a' <= *it && *it <= 'z')
+         // get the int value of the letter (which is ascii) and subtract 71 (to normalize)
+         temp = std::abs(71 - (int(*it)));
+      // if the character is between 0 and 9
+      else if ('0' <= *it && *it <= '9')
+         // get the int value of the letter (which is ascii) and add 4 (to normalize)
+         temp = std::abs(4 + (int(*it)));
+      // if +
+      else if ('+' == *it)
+         // add 19
+         temp = std::abs(19 + (int(*it)));
+      // if /
+      else if ('/' == *it)
+         // add 16
+         temp = std::abs(16 + (int(*it)));
+      // = not used
+
+      // get the bit value of the number
+      // store the bit value in the bit vector
+      num_to_bin(temp, ret, BASE64_DIGIT_SZ);
+   }
+   return ret;
 }
 
 /* This routine takes an ASCII string and converts it to a bit vector */
@@ -697,16 +736,17 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
    ex: if the keysize = 3, then the first string will contain
    the 1st, 4th, 7th, ... characters and so on.
    It will return a vector of strings */
-std::vector<std::string> SetOne::transpose_string(const std::string &str, const int keysize) {
-   std::vector<std::string> ret;
+std::vector<std::vector<bool> > SetOne::transpose_bit_vector(const std::vector<bool> &str, const int keysize) {
+   std::vector<std::vector<bool> > ret;
 
    // create a keysize number of strings in the vector
    for (int i = 0; i < keysize; ++i) {
       // initialize string for next characters
-      ret.push_back("");
+      ret.push_back(std::vector<bool>());
       // loop through characters starting from i, and incrementing by keysize
-      for (int j = i; j < str.size(); j += keysize) {
-         ret[i].push_back(str[j]);
+      for (int j = i; j < str.size(); j += keysize*8) {
+            for (int k = j; k < j+8; ++k)
+               ret[i].push_back(str[k]);
       }
    }
 

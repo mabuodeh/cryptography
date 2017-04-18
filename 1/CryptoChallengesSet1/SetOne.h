@@ -57,6 +57,8 @@ public:
 
    // Converts a hex string into bits, storing the bits in a boolean vector
    std::vector<bool> static hex_string_to_bits(std::string);
+   // Converts a hex string into bits, storing the bits in a boolean vector
+   std::vector<bool> static base64_string_to_bits(std::string str);
    // Converts a char string into bits, storing the bits in a boolean vector
    std::vector<bool> static bit_string_to_bits(std::string);
    // Given ASCII string, convert to bit vector
@@ -96,7 +98,7 @@ public:
    */
 
    int static get_keysize(const std::string &);
-   std::vector<std::string> static transpose_string(const std::string &, const int);
+   std::vector<std::vector<bool> > static transpose_bit_vector(const std::vector<bool> &, const int);
 
    // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
