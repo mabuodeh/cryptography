@@ -140,7 +140,7 @@ For each line read, character combinations will be xor'ed with that line,
 and the xor'ed text with the highest word frequency score will be taken.
 */
 void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::string &key, std::string &output,
-                                       double &frequency_value, const std::string &freq_location) {
+                                       double &frequency_value) {
    // initialize a final container, key container, and frequency value to keep track of the best decoded message
    std::string final_msg, final_key;
    double final_val = 0.0;
@@ -155,7 +155,8 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
       std::string temp_cont, temp_key;
       double temp_val = 0.0;
       // for each lines, obtain the the container and key with the highest frequency value
-      get_key_by_word_list(line, temp_key, temp_cont, temp_val, freq_location);
+      get_key_by_index_of_co(line, temp_key, temp_cont, temp_val);
+
       // if the temp frequency value is higher than the stored frequency value (final)
       if (temp_val > final_val) {
          // replace the final container and key with newly received values
@@ -170,6 +171,34 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
    frequency_value = final_val;
 
    fin.close();
+}
+
+/* modified version of challenge 4, string not file */
+void SetOne::multi_line_single_byte_xor_string(std::string line, std::string &key, std::string &output,
+                                       double &frequency_value) {
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::string final_msg, final_key;
+   double final_val = 0.0;
+
+   // initialize temp container, key, and frequency value for loop
+   std::string temp_cont, temp_key;
+   double temp_val = 0.0;
+   // for each lines, obtain the the container and key with the highest frequency value
+   get_key_by_index_of_co(line, temp_key, temp_cont, temp_val);
+
+   // if the temp frequency value is higher than the stored frequency value (final)
+   if (temp_val > final_val) {
+      // replace the final container and key with newly received values
+      final_msg = temp_cont;
+      final_key = temp_key;
+      final_val = temp_val;
+   } // endif
+
+   // assign key, output, and frequency value to the referenced variables
+   output = final_msg;
+   key = final_key;
+   frequency_value = final_val;
+
 }
 
 /* Challenge 5
@@ -198,32 +227,65 @@ The message information with the best frequency will be returned.
 void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std::string o_key) {
    // open file i_file
    std::ifstream fin(i_file.c_str());
+   std::ofstream fout("out_test.txt");
    // check if file opened
    if (fin == NULL) {
       std::cerr << "6.txt not opening!" << std::endl;
       return;
    }
    // read lines into an encrypted_message string
-   std::string encrypted_msg, temp;
+   std::string base64_msg, temp;
    while (fin >> temp) {
-      encrypted_msg.append(temp);
+      base64_msg.append(temp);
    }
+   //encrypted_msg = "HUIfTQsPAh9PE048GmllH0kcDk4TAQsHThsBFkU2AB4BSWQgVB0dQzNTTmVS\nBgBHVBwNRU0HBAxTEjwMHghJGgkRTxRMIRpHKwAFHUdZEQQJAGQmB1MANxYG\nDBoXQR0BUlQwXwAgEwoFR08SSAhFTmU+Fgk4RQYFCBpGB08fWXh+amI2DB0P\nQQ1IBlUaGwAdQnQEHgFJGgkRAlJ6f0kASDoAGhNJGk9FSA8dDVMEOgFSGQEL\nQRMGAEwxX1NiFQYHCQdUCxdBFBZJeTM1CxsBBQ9GB08dTnhOSCdSBAcMRVhI\nCEEATyBUCHQLHRlJAgAOFlwAUjBpZR9JAgJUAAELB04CEFMBJhAVTQIHAh9P\nG054MGk2UgoBCVQGBwlTTgIQUwg7EAYFSQ8PEE87ADpfRyscSWQzT1QCEFMa\nTwUWEXQMBk0PAg4DQ1JMPU4ALwtJDQhOFw0VVB1PDhxFXigLTRkBEgcKVVN4\nTk9iBgELR1MdDAAAFwoFHww6Ql5NLgFBIg4cSTRWQWI1Bk9HKn47CE8BGwFT\nQjcEBx4MThUcDgYHKxpUKhdJGQZZVCFFVwcDBVMHMUV4LAcKQR0JUlk3TwAm\nHQdJEwATARNFTg5JFwQ5C15NHQYEGk94dzBDADsdHE4UVBUaDE5JTwgHRTkA\nUmc6AUETCgYAN1xGYlUKDxJTEUgsAA0ABwcXOwlSGQELQQcbE0c9GioWGgwc\nAgcHSAtPTgsAABY9C1VNCAINGxgXRHgwaWUfSQcJABkRRU8ZAUkDDTUWF01j\nOgkRTxVJKlZJJwFJHQYADUgRSAsWSR8KIgBSAAxOABoLUlQwW1RiGxpOCEtU\nYiROCk8gUwY1C1IJCAACEU8QRSxORTBSHQYGTlQJC1lOBAAXRTpCUh0FDxhU\nZXhzLFtHJ1JbTkoNVDEAQU4bARZFOwsXTRAPRlQYE042WwAuGxoaAk5UHAoA\nZCYdVBZ0ChQLSQMYVAcXQTwaUy1SBQsTAAAAAAAMCggHRSQJExRJGgkGAAdH\nMBoqER1JJ0dDFQZFRhsBAlMMIEUHHUkPDxBPH0EzXwArBkkdCFUaDEVHAQAN\nU29lSEBAWk44G09fDXhxTi0RAk4ITlQbCk0LTx4cCjBFeCsGHEETAB1EeFZV\nIRlFTi4AGAEORU4CEFMXPBwfCBpOAAAdHUMxVVUxUmM9ElARGgZBAg4PAQQz\nDB4EGhoIFwoKUDFbTCsWBg0OTwEbRSonSARTBDpFFwsPCwIATxNOPBpUKhMd\nTh5PAUgGQQBPCxYRdG87TQoPD1QbE0s9GkFiFAUXR0cdGgkADwENUwg1DhdN\nAQsTVBgXVHYaKkg7TgNHTB0DAAA9DgQACjpFX0BJPQAZHB1OeE5PYjYMAg5M\nFQBFKjoHDAEAcxZSAwZOBREBC0k2HQxiKwYbR0MVBkVUHBZJBwp0DRMDDk5r\nNhoGACFVVWUeBU4MRREYRVQcFgAdQnQRHU0OCxVUAgsAK05ZLhdJZChWERpF\nQQALSRwTMRdeTRkcABcbG0M9Gk0jGQwdR1ARGgNFDRtJeSchEVIDBhpBHQlS\nWTdPBzAXSQ9HTBsJA0UcQUl5bw0KB0oFAkETCgYANlVXKhcbC0sAGgdFUAIO\nChZJdAsdTR0HDBFDUk43GkcrAAUdRyonBwpOTkJEUyo8RR8USSkOEENSSDdX\nRSAdDRdLAA0HEAAeHQYRBDYJC00MDxVUZSFQOV1IJwYdB0dXHRwNAA9PGgMK\nOwtTTSoBDBFPHU54W04mUhoPHgAdHEQAZGU/OjV6RSQMBwcNGA5SaTtfADsX\nGUJHWREYSQAnSARTBjsIGwNOTgkVHRYANFNLJ1IIThVIHQYKAGQmBwcKLAwR\nDB0HDxNPAU94Q083UhoaBkcTDRcAAgYCFkU1RQUEBwFBfjwdAChPTikBSR0T\nTwRIEVIXBgcURTULFk0OBxMYTwFUN0oAIQAQBwkHVGIzQQAGBR8EdCwRCEkH\nElQcF0w0U05lUggAAwANBxAAHgoGAwkxRRMfDE4DARYbTn8aKmUxCBsURVQf\nDVlOGwEWRTIXFwwCHUEVHRcAMlVDKRsHSUdMHQMAAC0dCAkcdCIeGAxOazkA\nBEk2HQAjHA1OAFIbBxNJAEhJBxctDBwKSRoOVBwbTj8aQS4dBwlHKjUECQAa\nBxscEDMNUhkBC0ETBxdULFUAJQAGARFJGk9FVAYGGlMNMRcXTRoBDxNPeG43\nTQA7HRxJFUVUCQhBFAoNUwctRQYFDE43PT9SUDdJUydcSWRtcwANFVAHAU5T\nFjtFGgwbCkEYBhlFeFsABRcbAwZOVCYEWgdPYyARNRcGAQwKQRYWUlQwXwAg\nExoLFAAcARFUBwFOUwImCgcDDU5rIAcXUj0dU2IcBk4TUh0YFUkASEkcC3QI\nGwMMQkE9SB8AMk9TNlIOCxNUHQZCAAoAHh1FXjYCDBsFABkOBkk7FgALVQRO\nD0EaDwxOSU8dGgI8EVIBAAUEVA5SRjlUQTYbCk5teRsdRVQcDhkDADBFHwhJ\nAQ8XClJBNl4AC1IdBghVEwARABoHCAdFXjwdGEkDCBMHBgAwW1YnUgAaRyon\nB0VTGgoZUwE7EhxNCAAFVAMXTjwaTSdSEAESUlQNBFJOZU5LXHQMHE0EF0EA\nBh9FeRp5LQdFTkAZREgMU04CEFMcMQQAQ0lkay0ABwcqXwA1FwgFAk4dBkIA\nCA4aB0l0PD1MSQ8PEE87ADtbTmIGDAILAB0cRSo3ABwBRTYKFhROHUETCgZU\nMVQHYhoGGksABwdJAB0ASTpFNwQcTRoDBBgDUkksGioRHUkKCE5THEVCC08E\nEgF0BBwJSQoOGkgGADpfADETDU5tBzcJEFMLTx0bAHQJCx8ADRJUDRdMN1RH\nYgYGTi5jMURFeQEaSRAEOkURDAUCQRkKUmQ5XgBIKwYbQFIRSBVJGgwBGgtz\nRRNNDwcVWE8BT3hJVCcCSQwGQx9IBE4KTwwdASEXF01jIgQATwZIPRpXKwYK\nBkdEGwsRTxxDSToGMUlSCQZOFRwKUkQ5VEMnUh0BR0MBGgAAZDwGUwY7CBdN\nHB5BFwMdUz0aQSwWSQoITlMcRUILTxoCEDUXF01jNw4BTwVBNlRBYhAIGhNM\nEUgIRU5CRFMkOhwGBAQLTVQOHFkvUkUwF0lkbXkbHUVUBgAcFA0gRQYFCBpB\nPU8FQSsaVycTAkJHYhsRSQAXABxUFzFFFggICkEDHR1OPxoqER1JDQhNEUgK\nTkJPDAUAJhwQAg0XQRUBFgArU04lUh0GDlNUGwpOCU9jeTY1HFJARE4xGA4L\nACxSQTZSDxsJSw1ICFUdBgpTNjUcXk0OAUEDBxtUPRpCLQtFTgBPVB8NSRoK\nSREKLUUVAklkERgOCwAsUkE2Ug8bCUsNSAhVHQYKUyI7RQUFABoEVA0dWXQa\nRy1SHgYOVBFIB08XQ0kUCnRvPgwQTgUbGBwAOVREYhAGAQBJEUgETgpPGR8E\nLUUGBQgaQRIaHEshGk03AQANR1QdBAkAFwAcUwE9AFxNY2QxGA4LACxSQTZS\nDxsJSw1ICFUdBgpTJjsIF00GAE1ULB1NPRpPLF5JAgJUVAUAAAYKCAFFXjUe\nDBBOFRwOBgA+T04pC0kDElMdC0VXBgYdFkU2CgtNEAEUVBwTWXhTVG5SGg8e\nAB0cRSo+AwgKRSANExlJCBQaBAsANU9TKxFJL0dMHRwRTAtPBRwQMAAATQcB\nFlRlIkw5QwA2GggaR0YBBg5ZTgIcAAw3SVIaAQcVEU8QTyEaYy0fDE4ITlhI\nJk8DCkkcC3hFMQIEC0EbAVIqCFZBO1IdBgZUVA4QTgUWSR4QJwwRTWM=";
 
    // step one: find the probable keysize
-   int keysize = get_keysize(encrypted_msg);
+   //int keysize = get_keysize(encrypted_msg);
+   //int keysize = 6;
 
-   // print out the keysize
-   std::cout << "keysize: " << keysize << std::endl;
+   std::vector<bool> bit_msg = ba
+   std::string encrypted_msg
 
-   // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
-   // split the encrypted message based on the keysize, all si characters in one string, etc..
-   // std::vector<std:string>
-   // loop through each string of key characters
-      // get the character with the best index of coincidence
-      // append it to the final key
-   // endloop
+   for (int keysize = 2; keysize <= 40; ++keysize) {
 
-   // using the supposed key, decrypt the message
+      // print out the keysize
+      std::cout << "keysize: " << keysize << std::endl;
+
+      // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
+      // split the encrypted message based on the keysize, all si characters in one string, etc..
+      std::vector<std::string> transposed_strings = transpose_string(encrypted_msg, keysize);
+
+      // initialize string to keep track of the key;
+      std::string final_key;
+
+      // loop through each string of key characters
+      for (std::vector<std::string>::const_iterator t_str = transposed_strings.begin(); t_str != transposed_strings.end(); ++t_str) {
+         // get the character with the best index of coincidence
+         std::string temp_key_val;
+         std::string not_needed_str;
+         double not_needed_double = 0.0;
+         // get_key_by_index_of_co(*t_str, temp_key_val, not_needed_str, not_needed_double);
+         multi_line_single_byte_xor_string(*t_str, temp_key_val, not_needed_str, not_needed_double);
+         // append it to the final key
+         std::vector<int> int_val;
+         bin_to_num(hex_string_to_bits(temp_key_val), int_val, 8);
+         char char_of_key = int_val[0];
+         int_val.clear();
+         final_key += char_of_key;
+      } // endloop
+
+      std::cout << "key: " << final_key << std::endl;
+      // using the supposed key, decrypt the message
+      std::string decrypted_msg;
+      double freq_v;
+      // multi_line_single_byte_xor(i_file, final_key, decrypted_msg, freq_v);
+      multi_byte_key_xor(i_file, final_key, decrypted_msg);
+      std::vector<bool> msg_bits = hex_string_to_bits(decrypted_msg);
+      decrypted_msg = bits_to_ascii_string(msg_bits);
+      std::cout << "decrypted ascii: " << decrypted_msg << std::endl;
+   }
+
 
 }
 
@@ -629,6 +691,26 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
    } // endloop
 
    return keysize;
+}
+
+/* This routine splits the string into a multiple strings;
+   ex: if the keysize = 3, then the first string will contain
+   the 1st, 4th, 7th, ... characters and so on.
+   It will return a vector of strings */
+std::vector<std::string> SetOne::transpose_string(const std::string &str, const int keysize) {
+   std::vector<std::string> ret;
+
+   // create a keysize number of strings in the vector
+   for (int i = 0; i < keysize; ++i) {
+      // initialize string for next characters
+      ret.push_back("");
+      // loop through characters starting from i, and incrementing by keysize
+      for (int j = i; j < str.size(); j += keysize) {
+         ret[i].push_back(str[j]);
+      }
+   }
+
+   return ret;
 }
 
 /*

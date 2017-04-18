@@ -23,7 +23,8 @@ public:
    void static get_key_by_word_list(std::string, std::string &, std::string &, double &, const std::string &);
    void static get_key_by_index_of_co(std::string, std::string &, std::string &, double &);
    // challenge 4
-   void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
+   void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &);
+   void static multi_line_single_byte_xor_string(std::string, std::string &, std::string &, double &);
    // challenge 5
    void static multi_byte_key_xor(const std::string &, const std::string &, std::string &);
    // challenge 6
@@ -95,6 +96,7 @@ public:
    */
 
    int static get_keysize(const std::string &);
+   std::vector<std::string> static transpose_string(const std::string &, const int);
 
    // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);

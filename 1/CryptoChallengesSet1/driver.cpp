@@ -67,12 +67,11 @@ int main () {
 
    // Test for challenge 4
 
-   std::string freq_list_location_ch4 = DIR + "word_freq_list.txt";
    std::string encrypted_lines_loc = DIR + "4.txt";
    std::string key_4, message_4;
    double freq_value_4 = 0.0;
 
-   SetOne::multi_line_single_byte_xor(encrypted_lines_loc, key_4, message_4, freq_value_4, freq_list_location);
+   SetOne::multi_line_single_byte_xor(encrypted_lines_loc, key_4, message_4, freq_value_4);
 
    std::cout << "Challenge 4" << std::endl
              << "Final message: " << message_4
@@ -95,7 +94,7 @@ int main () {
 
    // Test for challenge 6
 
-   std::string cha6 = DIR + "6.txt";
+   std::string cha6 = DIR + "6_2.txt";
    std::string o_msg_6, o_key_6;
    // send filename to function
    std::cout << "Challenge 6: " << std::endl;
