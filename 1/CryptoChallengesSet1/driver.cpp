@@ -100,6 +100,22 @@ int main () {
    std::cout << "Challenge 6: " << std::endl;
    SetOne::break_repeating_key_xor(cha6, o_msg_6, o_key_6);
 
+
+   std::vector<bool> bits;
+   SetOne::num_to_bin(0, bits, 8);SetOne::num_to_bin(1, bits, 8);SetOne::num_to_bin(2, bits, 8);SetOne::num_to_bin(3, bits, 8);
+   SetOne::num_to_bin(0, bits, 8);SetOne::num_to_bin(1, bits, 8);SetOne::num_to_bin(2, bits, 8);SetOne::num_to_bin(3, bits, 8);
+   for (std::vector<bool>::iterator it = bits.begin(); it != bits.end(); ++it) {
+      std::cout << *it;
+   }
+   std::cout << std::endl << std::endl;
+   std::vector<std::vector<bool> > t_v = SetOne::transpose_bit_vector(bits, 4);
+   for (std::vector<std::vector<bool> >::iterator it = t_v.begin(); it != t_v.end(); ++it) {
+      for (std::vector<bool>::iterator it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+         std::cout << *it2;
+      }
+      std::cout << std::endl;
+   }
+
    return 0;
 
 }
