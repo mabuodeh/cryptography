@@ -238,8 +238,8 @@ void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std:
    std::string encrypted_msg_ascii = bits_to_ascii_string(bit_msg);
 
    // step one: find the probable keysize
-   //int keysize = get_keysize(bit_msg);
-   int keysize = 29;
+   int keysize = get_keysize(bit_msg);
+   //int keysize = 29;
    std::cout << "keysize: " << keysize << std::endl;
 
    // assume keysize has been found
@@ -736,74 +736,36 @@ int SetOne::get_hamming_distance(std::vector<bool> first_vec, std::vector<bool> 
 /* This routine gets assumed keysize of a ciphertext using hamming distance */
 int SetOne::get_keysize(const std::vector<bool> &encrypted_msg) {
 
+   double highest_index_of_co = 0.0;
    int final_keysize;
-
-   std::map<int, int> keysize_count;
 
    // loop through 2-> 40
    for (int keysize = 2; keysize <= 40; ++keysize) {
-      double final_in_co = 0.0;
-      int final_k = 0;
+      double index_of_co_sum_per_keysize = 0.0;
+      double avg_index_of_co = 0.0;
       // for each keysize, transpose the msg
       std::vector<std::vector<bool> > blocks = transpose_bit_vector(encrypted_msg, keysize);
-      // just take the first vector and determine it's index of coincidence
-      for (int i = 0; i < keysize; ++i) {
-         double in_co = 0.0;
-         std::string temp_key;
+
+      // obtain the sum of the index of coincidence of the blocks
+      for (std::vector<std::vector<bool> >::size_type i = 0; i < blocks.size(); ++i) {
+         double index_of_co_block = 0.0;
+         std::string hex_key_not_n;
          std::string not_n;
 
-         get_key_by_index_of_co(bits_to_ascii_string(blocks[i]), temp_key, not_n, in_co);
-         if (in_co > final_in_co) {
-            final_in_co = in_co;
-            final_k = keysize;
-         }
+         get_key_by_index_of_co(bits_to_ascii_string(blocks[i]), hex_key_not_n, not_n, index_of_co_block);
+         index_of_co_sum_per_keysize += index_of_co_block;
       }
-      std::cout << final_k << std::endl;
-      ++keysize_count[final_k];
+      avg_index_of_co = index_of_co_sum_per_keysize/blocks.size();
 
       // take the lowest index of coincidence and its key
-
-
-   } // endloop
-
-   int keysize = 0;
-   for (std::map<int,int>::iterator it = keysize_count.begin(); it != keysize_count.end(); ++it) {
-      if (it -> second > keysize)
-         keysize = it -> first;
-   }
-   std::cout << keysize << std::endl;
-   // return the key
-   return final_keysize;
-
-/*
-   double final_quotient = 10000.0;
-   int keysize = 0;
-   // loop through keysize from 2 to 40 (this is the number of characters the key can be)
-   for (int i = 2; i <= 40; ++i) {
-      // initialize keysize
-      int temp_keysize = i;
-      // obtain a keysize number of bytes (characters), twice. We now have two blocks of keysize bytes each.
-      // obtain first keysize characters [0, keysize)
-      std::string first_chars(encrypted_msg.begin(), encrypted_msg.begin() + temp_keysize);
-      // obtain second keysize characters [keysize, keysize * 2)
-      std::string second_chars(encrypted_msg.begin() + temp_keysize, encrypted_msg.begin() + temp_keysize + temp_keysize * 2);
-      // convert these two character blocks into bits
-      std::vector<bool> first_block = ascii_string_to_bits(first_chars);
-      std::vector<bool> second_block = ascii_string_to_bits(second_chars);
-      // find the hamming distance of the blocks
-      int ham_dis = get_hamming_distance(first_block, second_block);
-      // divide the hamming distance by the keysize
-      double temp_quotient = double(ham_dis) / double(temp_keysize);
-      // if the quotient is less than the previously stored quotient
-      std::cout << "q: " << temp_quotient << "k: " << temp_keysize << std::endl;
-      if (temp_quotient < final_quotient) {
-         // clear all old keysize values
-         keysize = temp_keysize;
-         // replace the temporarily stored quotient with the current quotient
-         final_quotient = temp_quotient;
+      if (avg_index_of_co > highest_index_of_co) {
+         highest_index_of_co = avg_index_of_co;
+         final_keysize = keysize;
       }
    } // endloop
-*/
+
+   return final_keysize;
+
 }
 
 /* This routine splits the string into a multiple strings;
