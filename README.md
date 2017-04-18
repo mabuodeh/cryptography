@@ -5,7 +5,10 @@ Code refactored, planning out challenge 6
 
 Tasks:
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> cha6
 for get_key_by_index_of_co:
 let the return value for key remain as a bit vector
 

@@ -140,7 +140,7 @@ For each line read, character combinations will be xor'ed with that line,
 and the xor'ed text with the highest word frequency score will be taken.
 */
 void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::string &key, std::string &output,
-                                       double &frequency_value, const std::string &freq_location) {
+                                       double &frequency_value) {
    // initialize a final container, key container, and frequency value to keep track of the best decoded message
    std::string final_msg, final_key;
    double final_val = 0.0;
@@ -155,7 +155,8 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
       std::string temp_cont, temp_key;
       double temp_val = 0.0;
       // for each lines, obtain the the container and key with the highest frequency value
-      get_key_by_word_list(line, temp_key, temp_cont, temp_val, freq_location);
+      get_key_by_index_of_co(line, temp_key, temp_cont, temp_val);
+
       // if the temp frequency value is higher than the stored frequency value (final)
       if (temp_val > final_val) {
          // replace the final container and key with newly received values
@@ -170,6 +171,34 @@ void SetOne::multi_line_single_byte_xor(std::string encrypted_file_loc, std::str
    frequency_value = final_val;
 
    fin.close();
+}
+
+/* modified version of challenge 4, string not file */
+void SetOne::multi_line_single_byte_xor_string(std::string line, std::string &key, std::string &output,
+                                       double &frequency_value) {
+   // initialize a final container, key container, and frequency value to keep track of the best decoded message
+   std::string final_msg, final_key;
+   double final_val = 0.0;
+
+   // initialize temp container, key, and frequency value for loop
+   std::string temp_cont, temp_key;
+   double temp_val = 0.0;
+   // for each lines, obtain the the container and key with the highest frequency value
+   get_key_by_index_of_co(line, temp_key, temp_cont, temp_val);
+
+   // if the temp frequency value is higher than the stored frequency value (final)
+   if (temp_val > final_val) {
+      // replace the final container and key with newly received values
+      final_msg = temp_cont;
+      final_key = temp_key;
+      final_val = temp_val;
+   } // endif
+
+   // assign key, output, and frequency value to the referenced variables
+   output = final_msg;
+   key = final_key;
+   frequency_value = final_val;
+
 }
 
 /* Challenge 5
@@ -196,35 +225,103 @@ It will then use this information to decrypted the message based on combinations
 The message information with the best frequency will be returned.
 */
 void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std::string o_key) {
-   // open file i_file
+
    std::ifstream fin(i_file.c_str());
-   // check if file opened
-   if (fin == NULL) {
-      std::cerr << "6.txt not opening!" << std::endl;
-      return;
-   }
-   // read lines into an encrypted_message string
-   std::string encrypted_msg, temp;
+
+   std::string encrypted_msg_base64;
+   std::string temp;
    while (fin >> temp) {
-      encrypted_msg.append(temp);
+      encrypted_msg_base64.append(temp);
    }
+
+   std::vector<bool> bit_msg = base64_string_to_bits(encrypted_msg_base64);
+   std::string encrypted_msg_ascii = bits_to_ascii_string(bit_msg);
 
    // step one: find the probable keysize
-   int keysize = get_keysize(encrypted_msg);
-
-   // print out the keysize
+   //int keysize = get_keysize(bit_msg);
+   int keysize = 29;
    std::cout << "keysize: " << keysize << std::endl;
 
-   // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
-   // split the encrypted message based on the keysize, all si characters in one string, etc..
-   // std::vector<std:string>
-   // loop through each string of key characters
-      // get the character with the best index of coincidence
-      // append it to the final key
-   // endloop
+   // assume keysize has been found
 
-   // using the supposed key, decrypt the message
+   //int keysize = 29;
+   //for (int keysize = 2; keysize <= 40; ++keysize) {
 
+      // transpose the bit_msg; 6 blocks means 0th 6th 12th etc bytes in one block, etc
+      std::vector<std::vector<bool> > transposed_blocks = transpose_bit_vector(bit_msg, keysize);
+      /*
+      for (int i = 0; i < 29; ++i) {
+         for (int j = 0; j < transposed_blocks[i].size(); ++j){
+            std::cout << transposed_blocks[i][j];
+         }
+         std::cout << std::endl;
+      }
+      */
+      std::string final_key;
+      for (int i = 0; i < keysize; ++i) {
+         std::string temp_key;
+         std::string not_n_s;
+         double not_n_d = 0.0;
+         // solve each block and find the right character (using challenge 3). input: hex, output: hex string
+         get_key_by_index_of_co(bits_to_hex_string(transposed_blocks[i]), temp_key, not_n_s, not_n_d);
+
+         std::vector<int> int_v;
+         bin_to_num(hex_string_to_bits(temp_key), int_v, HEX_OCTET_DIGIT_SZ);
+
+         int char_num = int_v[0];
+         int_v.clear();
+         char key_char = char(char_num);
+
+         final_key.append(1, key_char);
+      }
+      std::cout << "final key: " <<keysize << " " << final_key << std::endl;
+   //}
+   // use this key as a repeating key to decode the message (challenge 5)
+   std::string output_hex;
+   multi_byte_key_xor(encrypted_msg_ascii, final_key, output_hex);
+   std::vector<bool> output_bits = hex_string_to_bits(output_hex);
+   std::cout << bits_to_ascii_string(output_bits);
+/*
+   for (int keysize = 2; keysize <= 40; ++keysize) {
+
+      // print out the keysize
+      std::cout << "keysize: " << keysize << std::endl;
+
+      // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
+      // split the encrypted message based on the keysize, all si characters in one string, etc..
+      std::vector<std::vector<bool> > transposed_bits = transpose_bit_vector(bit_msg, keysize);
+
+      // initialize string to keep track of the key;
+      std::string final_key;
+
+      // loop through each string of key characters
+      for (std::vector<std::vector<bool> >::iterator t_str = transposed_bits.begin(); t_str != transposed_bits.end(); ++t_str) {
+         // get the character with the best index of coincidence
+         std::string temp_key_val;
+         std::string not_needed_str;
+         double not_needed_double = 0.0;
+         std::string one_line(bits_to_ascii_string(*t_str));
+         multi_line_single_byte_xor_string(one_line, temp_key_val, not_needed_str, not_needed_double);
+         // append it to the final key
+         std::vector<int> int_val;
+         bin_to_num(hex_string_to_bits(temp_key_val), int_val, 8);
+         char char_of_key = int_val[0];
+         int_val.clear();
+         final_key += char_of_key;
+      } // endloop
+
+      std::cout << "key: " << final_key << std::endl;
+      // using the supposed key, decrypt the message
+      std::string decrypted_msg;
+      double freq_v;
+      // multi_line_single_byte_xor(i_file, final_key, decrypted_msg, freq_v);
+      multi_byte_key_xor(i_file, final_key, decrypted_msg);
+      std::vector<bool> msg_bits = hex_string_to_bits(decrypted_msg);
+      decrypted_msg = bits_to_ascii_string(msg_bits);
+      std::cout << "decrypted ascii: " << decrypted_msg << std::endl;
+   }
+
+*/
 }
 
 
@@ -252,7 +349,10 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 /* This routine takes a base64 string string and converts it to a bit vector */
 std::vector<bool> SetOne::base64_string_to_bits(std::string str) {
    std::vector<bool> ret;
+<<<<<<< HEAD
    std::cout << "in base64 to bits" << std::endl;
+=======
+>>>>>>> cha6
 
    // loop through the base64 string
    std::string::const_iterator it;
@@ -638,8 +738,48 @@ int SetOne::get_hamming_distance(std::vector<bool> first_vec, std::vector<bool> 
    return ret;
 }
 /* This routine gets assumed keysize of a ciphertext using hamming distance */
-int SetOne::get_keysize(const std::string &encrypted_msg) {
+int SetOne::get_keysize(const std::vector<bool> &encrypted_msg) {
 
+   int final_keysize;
+
+   std::map<int, int> keysize_count;
+
+   // loop through 2-> 40
+   for (int keysize = 2; keysize <= 40; ++keysize) {
+      double final_in_co = 0.0;
+      int final_k = 0;
+      // for each keysize, transpose the msg
+      std::vector<std::vector<bool> > blocks = transpose_bit_vector(encrypted_msg, keysize);
+      // just take the first vector and determine it's index of coincidence
+      for (int i = 0; i < keysize; ++i) {
+         double in_co = 0.0;
+         std::string temp_key;
+         std::string not_n;
+
+         get_key_by_index_of_co(bits_to_ascii_string(blocks[i]), temp_key, not_n, in_co);
+         if (in_co > final_in_co) {
+            final_in_co = in_co;
+            final_k = keysize;
+         }
+      }
+      std::cout << final_k << std::endl;
+      ++keysize_count[final_k];
+
+      // take the lowest index of coincidence and its key
+
+
+   } // endloop
+
+   int keysize = 0;
+   for (std::map<int,int>::iterator it = keysize_count.begin(); it != keysize_count.end(); ++it) {
+      if (it -> second > keysize)
+         keysize = it -> first;
+   }
+   std::cout << keysize << std::endl;
+   // return the key
+   return final_keysize;
+
+/*
    double final_quotient = 10000.0;
    int keysize = 0;
    // loop through keysize from 2 to 40 (this is the number of characters the key can be)
@@ -659,6 +799,7 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
       // divide the hamming distance by the keysize
       double temp_quotient = double(ham_dis) / double(temp_keysize);
       // if the quotient is less than the previously stored quotient
+      std::cout << "q: " << temp_quotient << "k: " << temp_keysize << std::endl;
       if (temp_quotient < final_quotient) {
          // clear all old keysize values
          keysize = temp_keysize;
@@ -666,8 +807,43 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
          final_quotient = temp_quotient;
       }
    } // endloop
+*/
+}
 
-   return keysize;
+/* This routine splits the string into a multiple strings;
+   ex: if the keysize = 3, then the first string will contain
+   the 1st, 4th, 7th, ... characters and so on.
+   It will return a vector of strings */
+std::vector<std::vector<bool> > SetOne::transpose_bit_vector(const std::vector<bool> &bits, const int keysize) {
+
+   // create a vector of vectors, of size keysize
+   std::vector<std::vector<bool> > ret;
+   for (int i = 0; i < keysize; ++i)
+      ret.push_back(std::vector<bool>());
+
+   // initialize a counter
+   int counter = 0;
+   // initialize keysize locater
+   int keysize_locater = 0;
+   // loop through all the given vector bits
+   std::vector<bool>::const_iterator bit_it = bits.begin();
+   while (bit_it != bits.end()) {
+      // push a bit into vector[keysize_locator]
+      ret[keysize_locater].push_back(*bit_it);
+      // increment counter
+      ++counter;
+      //  if counter is equal to 8
+      if (counter == 8) {
+         // increment keysize locater (using keysize locator % keysize)
+         keysize_locater = (keysize_locater + 1) % keysize;
+         // reinitialize counter
+         counter = 0;
+      } // endif
+      // increment loop
+      ++bit_it;
+   } // endloop
+
+   return ret;
 }
 
 /*

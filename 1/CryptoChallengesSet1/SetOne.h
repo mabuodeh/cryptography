@@ -23,7 +23,8 @@ public:
    void static get_key_by_word_list(std::string, std::string &, std::string &, double &, const std::string &);
    void static get_key_by_index_of_co(std::string, std::string &, std::string &, double &);
    // challenge 4
-   void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &, const std::string &);
+   void static multi_line_single_byte_xor(std::string, std::string &, std::string &, double &);
+   void static multi_line_single_byte_xor_string(std::string, std::string &, std::string &, double &);
    // challenge 5
    void static multi_byte_key_xor(const std::string &, const std::string &, std::string &);
    // challenge 6
@@ -56,8 +57,13 @@ public:
 
    // Converts a hex string into bits, storing the bits in a boolean vector
    std::vector<bool> static hex_string_to_bits(std::string);
+<<<<<<< HEAD
    // Converts a base64 string into bits, storing the bits in a boolean vector
    std::vector<bool> static base64_string_to_bits(std::string);
+=======
+   // Converts a hex string into bits, storing the bits in a boolean vector
+   std::vector<bool> static base64_string_to_bits(std::string str);
+>>>>>>> cha6
    // Converts a char string into bits, storing the bits in a boolean vector
    std::vector<bool> static bit_string_to_bits(std::string);
    // Given ASCII string, convert to bit vector
@@ -96,7 +102,8 @@ public:
    / Polyalphabetic (Vigenere) functions
    */
 
-   int static get_keysize(const std::string &);
+   int static get_keysize(const std::vector<bool> &);
+   std::vector<std::vector<bool> > static transpose_bit_vector(const std::vector<bool> &, const int);
 
    // Given a string and a word list along with word frequencies, obtain the word frequency
    double static calc_word_frequency(const std::string&, const std::map<std::string, double> &);
