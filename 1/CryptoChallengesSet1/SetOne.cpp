@@ -349,6 +349,10 @@ std::vector<bool> SetOne::hex_string_to_bits(std::string str) {
 /* This routine takes a base64 string string and converts it to a bit vector */
 std::vector<bool> SetOne::base64_string_to_bits(std::string str) {
    std::vector<bool> ret;
+<<<<<<< HEAD
+   std::cout << "in base64 to bits" << std::endl;
+=======
+>>>>>>> cha6
 
    // loop through the base64 string
    std::string::const_iterator it;

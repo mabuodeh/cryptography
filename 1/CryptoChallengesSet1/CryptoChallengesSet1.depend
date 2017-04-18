@@ -14,19 +14,59 @@
 	<algorithm>
 	<math.h>
 
+<<<<<<< HEAD
 1492498535 source:c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\driver.cpp
+=======
+1492498235 D
+
+1492498264 source:c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\driver.cpp
 	"SetOne.h"
 	<iostream>
 	<fstream>
 	<algorithm>
 
+1492498235 6
+	"SetOne.h"
+	<iostream>
+	<fstream>
+	<algorithm>
+	<vector>
+	<string>
+	<iostream>
+	<map>
+>>>>>>> master
+	"SetOne.h"
+	<iostream>
+	<algorithm>
+	<math.h>
+	<fstream>
+	<cctype>
+	<vector>
+	<string>
+	<iostream>
+	<map>
+	"SetOne.h"
+	<iostream>
+	<algorithm>
+	<math.h>
+	<fstream>
+	<cctype>
+
+<<<<<<< HEAD
 1492498535 c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\setone.h
+=======
+1492498264 c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\setone.h
+>>>>>>> master
 	<vector>
 	<string>
 	<iostream>
 	<map>
 
+<<<<<<< HEAD
 1492498535 source:c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\setone.cpp
+=======
+1492498264 source:c:\users\abu3odeh\documents\github\cryptography\1\cryptochallengesset1\setone.cpp
+>>>>>>> master
 	"SetOne.h"
 	<iostream>
 	<algorithm>
