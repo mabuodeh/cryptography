@@ -97,7 +97,7 @@ public:
    / Polyalphabetic (Vigenere) functions
    */
 
-   int static get_keysize(const std::string &);
+   int static get_keysize(const std::vector<bool> &);
    std::vector<std::vector<bool> > static transpose_bit_vector(const std::vector<bool> &, const int);
 
    // Given a string and a word list along with word frequencies, obtain the word frequency

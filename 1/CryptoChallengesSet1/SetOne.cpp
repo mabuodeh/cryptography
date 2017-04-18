@@ -226,23 +226,61 @@ The message information with the best frequency will be returned.
 */
 void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std::string o_key) {
 
-   std::string encrypted_msg_base64 = "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";
+   std::ifstream fin(i_file.c_str());
 
-   // step one: find the probable keysize
-   //int keysize = get_keysize(encrypted_msg);
-   //int keysize = 6;
+   std::string encrypted_msg_base64;
+   std::string temp;
+   while (fin >> temp) {
+      encrypted_msg_base64.append(temp);
+   }
 
    std::vector<bool> bit_msg = base64_string_to_bits(encrypted_msg_base64);
    std::string encrypted_msg_ascii = bits_to_ascii_string(bit_msg);
 
+   // step one: find the probable keysize
+   //int keysize = get_keysize(bit_msg);
+   int keysize = 29;
+   std::cout << "keysize: " << keysize << std::endl;
+
    // assume keysize has been found
 
-   int keysize = 6;
+   //int keysize = 29;
+   //for (int keysize = 2; keysize <= 40; ++keysize) {
 
-   // transpose the bit_msg; 6 blocks means 0th 6th 12th etc bytes in one block, etc
-   std::vector<std::vector<bool> > transposed_blocks = transpose_bit_vector(bit_msg, keysize);
+      // transpose the bit_msg; 6 blocks means 0th 6th 12th etc bytes in one block, etc
+      std::vector<std::vector<bool> > transposed_blocks = transpose_bit_vector(bit_msg, keysize);
+      /*
+      for (int i = 0; i < 29; ++i) {
+         for (int j = 0; j < transposed_blocks[i].size(); ++j){
+            std::cout << transposed_blocks[i][j];
+         }
+         std::cout << std::endl;
+      }
+      */
+      std::string final_key;
+      for (int i = 0; i < keysize; ++i) {
+         std::string temp_key;
+         std::string not_n_s;
+         double not_n_d = 0.0;
+         // solve each block and find the right character (using challenge 3). input: hex, output: hex string
+         get_key_by_index_of_co(bits_to_hex_string(transposed_blocks[i]), temp_key, not_n_s, not_n_d);
 
+         std::vector<int> int_v;
+         bin_to_num(hex_string_to_bits(temp_key), int_v, HEX_OCTET_DIGIT_SZ);
 
+         int char_num = int_v[0];
+         int_v.clear();
+         char key_char = char(char_num);
+
+         final_key.append(1, key_char);
+      }
+      std::cout << "final key: " <<keysize << " " << final_key << std::endl;
+   //}
+   // use this key as a repeating key to decode the message (challenge 5)
+   std::string output_hex;
+   multi_byte_key_xor(encrypted_msg_ascii, final_key, output_hex);
+   std::vector<bool> output_bits = hex_string_to_bits(output_hex);
+   std::cout << bits_to_ascii_string(output_bits);
 /*
    for (int keysize = 2; keysize <= 40; ++keysize) {
 
@@ -696,8 +734,48 @@ int SetOne::get_hamming_distance(std::vector<bool> first_vec, std::vector<bool> 
    return ret;
 }
 /* This routine gets assumed keysize of a ciphertext using hamming distance */
-int SetOne::get_keysize(const std::string &encrypted_msg) {
+int SetOne::get_keysize(const std::vector<bool> &encrypted_msg) {
 
+   int final_keysize;
+
+   std::map<int, int> keysize_count;
+
+   // loop through 2-> 40
+   for (int keysize = 2; keysize <= 40; ++keysize) {
+      double final_in_co = 0.0;
+      int final_k = 0;
+      // for each keysize, transpose the msg
+      std::vector<std::vector<bool> > blocks = transpose_bit_vector(encrypted_msg, keysize);
+      // just take the first vector and determine it's index of coincidence
+      for (int i = 0; i < keysize; ++i) {
+         double in_co = 0.0;
+         std::string temp_key;
+         std::string not_n;
+
+         get_key_by_index_of_co(bits_to_ascii_string(blocks[i]), temp_key, not_n, in_co);
+         if (in_co > final_in_co) {
+            final_in_co = in_co;
+            final_k = keysize;
+         }
+      }
+      std::cout << final_k << std::endl;
+      ++keysize_count[final_k];
+
+      // take the lowest index of coincidence and its key
+
+
+   } // endloop
+
+   int keysize = 0;
+   for (std::map<int,int>::iterator it = keysize_count.begin(); it != keysize_count.end(); ++it) {
+      if (it -> second > keysize)
+         keysize = it -> first;
+   }
+   std::cout << keysize << std::endl;
+   // return the key
+   return final_keysize;
+
+/*
    double final_quotient = 10000.0;
    int keysize = 0;
    // loop through keysize from 2 to 40 (this is the number of characters the key can be)
@@ -717,6 +795,7 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
       // divide the hamming distance by the keysize
       double temp_quotient = double(ham_dis) / double(temp_keysize);
       // if the quotient is less than the previously stored quotient
+      std::cout << "q: " << temp_quotient << "k: " << temp_keysize << std::endl;
       if (temp_quotient < final_quotient) {
          // clear all old keysize values
          keysize = temp_keysize;
@@ -724,8 +803,7 @@ int SetOne::get_keysize(const std::string &encrypted_msg) {
          final_quotient = temp_quotient;
       }
    } // endloop
-
-   return keysize;
+*/
 }
 
 /* This routine splits the string into a multiple strings;
