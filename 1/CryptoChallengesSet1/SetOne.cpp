@@ -242,86 +242,33 @@ void SetOne::break_repeating_key_xor(std::string i_file, std::string o_msg, std:
    //int keysize = 29;
    std::cout << "keysize: " << keysize << std::endl;
 
-   // assume keysize has been found
+   // transpose the bit_msg; 6 blocks means 0th 6th 12th etc bytes in one block, etc
+   std::vector<std::vector<bool> > transposed_blocks = transpose_bit_vector(bit_msg, keysize);
+   std::string final_key;
+   for (int i = 0; i < keysize; ++i) {
+      std::string temp_key;
+      std::string not_n_s;
+      double not_n_d = 0.0;
+      // solve each block and find the right character (using challenge 3). input: hex, output: hex string
+      get_key_by_index_of_co(bits_to_hex_string(transposed_blocks[i]), temp_key, not_n_s, not_n_d);
 
-   //int keysize = 29;
-   //for (int keysize = 2; keysize <= 40; ++keysize) {
+      std::vector<int> int_v;
+      bin_to_num(hex_string_to_bits(temp_key), int_v, HEX_OCTET_DIGIT_SZ);
 
-      // transpose the bit_msg; 6 blocks means 0th 6th 12th etc bytes in one block, etc
-      std::vector<std::vector<bool> > transposed_blocks = transpose_bit_vector(bit_msg, keysize);
-      /*
-      for (int i = 0; i < 29; ++i) {
-         for (int j = 0; j < transposed_blocks[i].size(); ++j){
-            std::cout << transposed_blocks[i][j];
-         }
-         std::cout << std::endl;
-      }
-      */
-      std::string final_key;
-      for (int i = 0; i < keysize; ++i) {
-         std::string temp_key;
-         std::string not_n_s;
-         double not_n_d = 0.0;
-         // solve each block and find the right character (using challenge 3). input: hex, output: hex string
-         get_key_by_index_of_co(bits_to_hex_string(transposed_blocks[i]), temp_key, not_n_s, not_n_d);
+      int char_num = int_v[0];
+      int_v.clear();
+      char key_char = char(char_num);
 
-         std::vector<int> int_v;
-         bin_to_num(hex_string_to_bits(temp_key), int_v, HEX_OCTET_DIGIT_SZ);
+      final_key.append(1, key_char);
+   }
+   std::cout << "final key: " <<keysize << " " << final_key << std::endl;
 
-         int char_num = int_v[0];
-         int_v.clear();
-         char key_char = char(char_num);
-
-         final_key.append(1, key_char);
-      }
-      std::cout << "final key: " <<keysize << " " << final_key << std::endl;
-   //}
    // use this key as a repeating key to decode the message (challenge 5)
    std::string output_hex;
    multi_byte_key_xor(encrypted_msg_ascii, final_key, output_hex);
    std::vector<bool> output_bits = hex_string_to_bits(output_hex);
    std::cout << bits_to_ascii_string(output_bits);
-/*
-   for (int keysize = 2; keysize <= 40; ++keysize) {
 
-      // print out the keysize
-      std::cout << "keysize: " << keysize << std::endl;
-
-      // get_key_by_index_of_co(std::string message, std::string &key, std::string &output, double &frequency_value)
-      // split the encrypted message based on the keysize, all si characters in one string, etc..
-      std::vector<std::vector<bool> > transposed_bits = transpose_bit_vector(bit_msg, keysize);
-
-      // initialize string to keep track of the key;
-      std::string final_key;
-
-      // loop through each string of key characters
-      for (std::vector<std::vector<bool> >::iterator t_str = transposed_bits.begin(); t_str != transposed_bits.end(); ++t_str) {
-         // get the character with the best index of coincidence
-         std::string temp_key_val;
-         std::string not_needed_str;
-         double not_needed_double = 0.0;
-         std::string one_line(bits_to_ascii_string(*t_str));
-         multi_line_single_byte_xor_string(one_line, temp_key_val, not_needed_str, not_needed_double);
-         // append it to the final key
-         std::vector<int> int_val;
-         bin_to_num(hex_string_to_bits(temp_key_val), int_val, 8);
-         char char_of_key = int_val[0];
-         int_val.clear();
-         final_key += char_of_key;
-      } // endloop
-
-      std::cout << "key: " << final_key << std::endl;
-      // using the supposed key, decrypt the message
-      std::string decrypted_msg;
-      double freq_v;
-      // multi_line_single_byte_xor(i_file, final_key, decrypted_msg, freq_v);
-      multi_byte_key_xor(i_file, final_key, decrypted_msg);
-      std::vector<bool> msg_bits = hex_string_to_bits(decrypted_msg);
-      decrypted_msg = bits_to_ascii_string(msg_bits);
-      std::cout << "decrypted ascii: " << decrypted_msg << std::endl;
-   }
-
-*/
 }
 
 
